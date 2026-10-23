@@ -1,0 +1,23 @@
+{
+  "id": "training-cooling-01",
+  "observedAt": "2026-09-20T14:30:00Z",
+  "room": "Cooling room",
+  "readings": [
+    {
+      "metric": "air temperature",
+      "value": 19.2,
+      "unit": "\u00b0C"
+    },
+    {
+      "metric": "relative humidity",
+      "value": 62,
+      "unit": "%"
+    }
+  ],
+  "missing": [
+    "door inspection",
+    "cause",
+    "product quality decision"
+  ],
+  "source": "Invented snapshot for the workshop; not live telemetry"
+}
