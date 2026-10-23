@@ -1,0 +1,11 @@
+**/node_modules
+**/.env*
+output
+downloads
+qa
+slides
+presenter
+explorer/public/bundle.js
+explorer/test
+
+models

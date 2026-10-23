@@ -1,0 +1,111 @@
+{
+  "documents": [
+    {
+      "id": "SOV-FAC-EXT-01",
+      "file": "company-documents/external-repair-visits.md",
+      "title": "External repair visits",
+      "version": "0.1",
+      "roles": [
+        "operator",
+        "maintenance"
+      ],
+      "rooms": []
+    },
+    {
+      "id": "SOV-OPS-COOL-01",
+      "file": "company-documents/cooling-room-incident.md",
+      "title": "Cooling-room incident response",
+      "version": "1.0",
+      "roles": [
+        "operator",
+        "maintenance"
+      ],
+      "rooms": [
+        "cooling"
+      ]
+    },
+    {
+      "id": "SOV-PEOPLE-01",
+      "file": "company-documents/duty-roster.md",
+      "title": "Duty roster for the training shift",
+      "version": "1.0",
+      "roles": [
+        "operator",
+        "maintenance"
+      ],
+      "rooms": []
+    },
+    {
+      "id": "SOV-VISIT-042",
+      "file": "company-documents/technician-visit-brief.md",
+      "title": "Technician brief for V-042",
+      "version": "1.0",
+      "roles": [
+        "operator",
+        "maintenance",
+        "contractor"
+      ],
+      "rooms": [
+        "cooling"
+      ]
+    },
+    {
+      "id": "SOV-EQUIP-01",
+      "file": "company-documents/equipment-register.md",
+      "title": "Cooling equipment training register",
+      "version": "1.0",
+      "roles": [
+        "operator",
+        "maintenance",
+        "contractor"
+      ],
+      "rooms": [
+        "cooling"
+      ]
+    },
+    {
+      "id": "SOV-MAINT-017",
+      "file": "company-documents/maintenance-history.md",
+      "title": "Previous cooling-room incident and internal service notes",
+      "version": "1.0",
+      "roles": [
+        "maintenance"
+      ],
+      "rooms": [
+        "cooling"
+      ]
+    },
+    {
+      "id": "DANFOSS-OPTYMA",
+      "file": "reference-documents/optyma-cooler.pdf",
+      "title": "Danfoss Optyma Cooler",
+      "version": "AN378367211987en-US0101",
+      "url": "https://assets.danfoss.com/documents/latest/187472/AN378367211987en-US0101.pdf",
+      "roles": [
+        "operator",
+        "maintenance",
+        "contractor"
+      ],
+      "rooms": [
+        "cooling"
+      ],
+      "optional": false
+    },
+    {
+      "id": "DANFOSS-AKRC",
+      "file": "reference-documents/ak-rc-305w-sd.pdf",
+      "title": "Danfoss AK-RC 305W-SD controller",
+      "version": "BC419723137674en-000202",
+      "url": "https://assets.danfoss.com/documents/latest/560194/BC419723137674en-000202.pdf",
+      "roles": [
+        "operator",
+        "maintenance",
+        "contractor"
+      ],
+      "rooms": [
+        "cooling"
+      ],
+      "optional": false
+    }
+  ]
+}

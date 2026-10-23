@@ -1,0 +1,95 @@
+name: soverius-rag-lab
+services:
+  download-models:
+    image: python:3.10-slim-bookworm
+    init: true
+    network_mode: bridge
+    restart: "no"
+    stop_grace_period: 2s
+    volumes: ["./models:/models"]
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        pip install --no-cache-dir 'huggingface_hub[cli]==0.35.3'
+        hf download ggml-org/gemma-4-12B-it-GGUF gemma-4-12B-it-Q4_0.gguf --cache-dir /models
+        exec hf download ggml-org/embeddinggemma-300M-GGUF embeddinggemma-300M-Q8_0.gguf --cache-dir /models
+  llama:
+    image: ghcr.io/ggml-org/llama.cpp:server@sha256:559ac229adefe0f7e2d4e32f5222f26927b6bb8ba44b9db08e2544afebf41984
+    init: true
+    ports: ["127.0.0.1:${LLAMA_PORT:-8080}:8080"]
+    environment: {LLAMA_CACHE: /models}
+    volumes: ["./models:/models", "./workshop/llama:/config:ro"]
+    command: ["--host", "0.0.0.0", "--port", "8080", "--models-preset", "/config/models.ini", "--models-max", "1", "--no-models-autoload"]
+  postgres:
+    image: pgvector/pgvector:0.8.2-pg17
+    environment:
+      POSTGRES_DB: raglab
+      POSTGRES_USER: lab_admin
+      POSTGRES_PASSWORD: local-workshop-admin
+    ports: ["127.0.0.1:${POSTGRES_PORT:-5436}:5432"]
+    volumes: ["rag-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lab_admin -d raglab"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  explorer:
+    image: soverius/rag-lab-explorer:local
+    build: {context: ., dockerfile: apps/explorer/Dockerfile}
+    ports: ["127.0.0.1:${EXPLORER_PORT:-4341}:4341"]
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: raglab
+      ADMIN_PASSWORD: local-workshop-admin
+      PUBLIC_ORIGIN: http://localhost:${EXPLORER_PORT:-4341}
+      WORKSHOP_PASSWORD: workshop
+      EMBED_BASE_URL: http://llama:8080/v1
+      EMBED_MODEL: workshop-embed
+      EMBED_SPACE_ID: workshop-embed-v1
+      DOCUMENT_PREFIX: "title: none | text: "
+      QUERY_PREFIX: "task: search result | query: "
+      CHAT_BASE_URL: http://llama:8080/v1
+      CHAT_MODEL: Gemma
+    volumes: ["./workshop/corpus/reference-documents:/pdfs:ro"]
+    depends_on:
+      postgres: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4341/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  incident-backend:
+    image: soverius/incident-backend:local
+    build: {context: ., dockerfile: apps/incident-system/Dockerfile, target: incident-backend}
+    init: true
+    environment:
+      FACILITY_HOST: 0.0.0.0
+      FACILITY_DB_PATH: /data/facility.sqlite
+    volumes: ["incident-data:/data"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3101/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  incident:
+    image: soverius/incident:local
+    build: {context: ., dockerfile: apps/incident-system/Dockerfile, target: incident}
+    ports: ["127.0.0.1:${INCIDENT_PORT:-4300}:80"]
+    depends_on:
+      incident-backend: {condition: service_healthy}
+  model-inspect:
+    image: soverius/model-inspect:local
+    build: {context: ./infrastructure, dockerfile: Dockerfile.inspect}
+    command: ["--help"]
+    attach: false
+    volumes: ["./models:/models:ro"]
+volumes:
+  rag-data:
+    name: soverius-rag-lab_rag-data
+  incident-data:
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: ${RAG_LAB_SUBNET:-10.203.44.0/24}

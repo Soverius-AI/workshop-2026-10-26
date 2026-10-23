@@ -1,0 +1,288 @@
+import {
+  afterNextRender,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  Injector,
+  input,
+  signal,
+  viewChild,
+} from '@angular/core';
+import {
+  RenderToolCalls,
+  type HumanInTheLoopToolCall,
+  type HumanInTheLoopToolRenderer,
+} from '@copilotkit/angular';
+import {
+  alarmApprovalAuditEntrySchema,
+  alarmApprovalToolSchema,
+  type AlarmApprovalAuditEntry,
+  type AlarmApprovalDecision,
+  type AlarmApprovalToolInput,
+} from '@packt-workshop/contracts';
+import { FacilityStore } from '../../data/facility-store';
+
+@Component({
+  selector: 'app-alarm-approval-card',
+  template: `
+    <section #card class="approval-card" tabindex="-1" [attr.aria-labelledby]="headingId">
+      <p class="eyebrow">Human approval required</p>
+      <h3 [id]="headingId">Raise an alarm?</h3>
+
+      @if (toolCall().status === 'in-progress') {
+        <p role="status">Preparing the approval request…</p>
+      } @else if (proposalProblem(); as problem) {
+        <p role="alert">{{ problem }} No alarm was raised.</p>
+        @if (toolCall().status === 'executing' && !dismissed()) {
+          <button type="button" (click)="dismissProposal()">Dismiss proposal</button>
+        }
+      } @else if (proposal(); as proposal) {
+        <dl>
+          <div>
+            <dt>Room</dt>
+            <dd>{{ roomName() }}</dd>
+          </div>
+          <div>
+            <dt>Metric</dt>
+            <dd>{{ proposal.metricName }}</dd>
+          </div>
+          <div>
+            <dt>Reason</dt>
+            <dd>{{ proposal.reason }}</dd>
+          </div>
+          <div>
+            <dt>Operator</dt>
+            <dd>night-reception</dd>
+          </div>
+        </dl>
+
+        @if (record(); as record) {
+          <p class="decision" role="status" [class.executed]="record.outcome === 'executed'">
+            {{ outcomeLabel(record) }}
+          </p>
+          <small>Correlation ID: {{ record.correlationId }}</small>
+        } @else if (toolCall().status === 'executing') {
+          <p>This operation changes facility data and will be written to the decision audit.</p>
+          <div class="actions">
+            <button type="button" class="reject" [disabled]="busy()" (click)="decide('rejected')">
+              Reject
+            </button>
+            <button type="button" [disabled]="busy()" (click)="decide('approved')">
+              {{ busy() ? 'Recording…' : 'Approve and raise alarm' }}
+            </button>
+          </div>
+          @if (error()) {
+            <p class="error" role="alert">{{ error() }}</p>
+          }
+        } @else {
+          <p role="status">Preparing the approval request…</p>
+        }
+      }
+    </section>
+  `,
+  styles: `
+    .approval-card {
+      margin: 10px 0;
+      padding: 16px;
+      border: 1px solid #cfbca8;
+      border-left: 5px solid #b46b00;
+      border-radius: 12px;
+      background: #fffaf2;
+      color: var(--so-text);
+    }
+    .eyebrow {
+      margin: 0 0 4px;
+      color: #7d4c08;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    h3 {
+      margin: 0 0 12px;
+    }
+    dl {
+      display: grid;
+      gap: 8px;
+      margin: 0 0 12px;
+    }
+    dl div {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 8px;
+    }
+    dt {
+      color: var(--so-text-muted);
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+    dd {
+      margin: 0;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    button {
+      padding: 9px 12px;
+      border: 0;
+      border-radius: 9px;
+      background: var(--so-brand);
+      color: var(--so-on-brand);
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    button.reject {
+      border: 1px solid var(--so-control-border);
+      background: var(--so-surface);
+      color: var(--so-brand);
+    }
+    button:disabled {
+      cursor: progress;
+      opacity: 0.58;
+    }
+    button:focus-visible {
+      outline: 3px solid var(--so-brand);
+      outline-offset: 3px;
+    }
+    .decision {
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--so-surface-tint);
+      font-weight: 800;
+    }
+    .decision.executed {
+      background: var(--so-success-soft);
+      color: var(--so-success-text);
+    }
+    .error {
+      color: #8f2f24;
+    }
+    small {
+      overflow-wrap: anywhere;
+      color: var(--so-text-muted);
+    }
+  `,
+})
+export class AlarmApprovalCard implements HumanInTheLoopToolRenderer<AlarmApprovalToolInput> {
+  readonly toolCall = input.required<HumanInTheLoopToolCall<AlarmApprovalToolInput>>();
+  readonly #store = inject(FacilityStore);
+  readonly #injector = inject(Injector);
+  private readonly card = viewChild.required<ElementRef<HTMLElement>>('card');
+  readonly #renderer = inject(RenderToolCalls);
+  readonly #correlationId = computed(() => {
+    const message = this.#renderer.message();
+    const calls = (message.toolCalls ?? []).filter((call) => call.function.name === 'review_alarm');
+    if (calls.length !== 1) return undefined;
+    return JSON.stringify([message.id, calls[0]!.id]);
+  });
+  protected readonly headingId = `alarm-approval-${crypto.randomUUID()}`;
+  protected readonly busy = signal(false);
+  protected readonly dismissed = signal(false);
+  protected readonly error = signal<string | undefined>(undefined);
+  protected readonly recorded = signal<AlarmApprovalAuditEntry | undefined>(undefined);
+  protected readonly proposal = computed(
+    () => alarmApprovalToolSchema.safeParse(this.toolCall().args).data,
+  );
+  protected readonly proposalProblem = computed(() => {
+    const proposal = this.proposal();
+    if (!proposal) return 'The alarm proposal is incomplete or invalid.';
+    if (!this.#correlationId()) return 'Only one alarm proposal per message is supported.';
+    const metric = this.#store
+      .rooms()
+      .flatMap((room) => room.metrics)
+      .find((metric) => metric.id === proposal.metricId);
+    if (!metric || metric.name !== proposal.metricName)
+      return 'The proposed metric does not match the facility catalog.';
+    return undefined;
+  });
+  protected readonly roomName = computed(
+    () =>
+      this.#store
+        .rooms()
+        .find((room) => room.metrics.some((metric) => metric.id === this.proposal()?.metricId))
+        ?.name ?? 'Unknown room',
+  );
+  protected readonly record = computed(() => {
+    const recorded = this.recorded();
+    if (recorded) return recorded;
+    const result = this.toolCall().result;
+    if (!result) return undefined;
+    try {
+      return alarmApprovalAuditEntrySchema.safeParse(JSON.parse(result) as unknown).data;
+    } catch {
+      return undefined;
+    }
+  });
+
+  protected async decide(decision: AlarmApprovalDecision): Promise<void> {
+    const toolCall = this.toolCall();
+    const proposal = this.proposal();
+    const correlationId = this.#correlationId();
+    if (
+      !correlationId ||
+      toolCall.status !== 'executing' ||
+      !proposal ||
+      this.proposalProblem() ||
+      this.busy() ||
+      this.record()
+    )
+      return;
+
+    const card = this.card().nativeElement;
+    const hadFocus = card.contains(card.ownerDocument.activeElement);
+    this.busy.set(true);
+    this.error.set(undefined);
+    try {
+      const record = await this.#store.decideAlarmApproval({
+        correlationId,
+        proposal,
+        decision,
+        operatorId: 'night-reception',
+      });
+      this.restoreFocus(hadFocus);
+      this.recorded.set(record);
+      toolCall.respond(record);
+    } catch (error) {
+      this.error.set(
+        error instanceof Error ? error.message : 'The decision could not be recorded.',
+      );
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  protected dismissProposal(): void {
+    const call = this.toolCall();
+    const problem = this.proposalProblem();
+    if (call.status !== 'executing' || !problem || this.dismissed()) return;
+    this.restoreFocus();
+    this.dismissed.set(true);
+    call.respond({ decision: 'rejected', outcome: 'not-executed', error: problem });
+  }
+
+  private restoreFocus(hadFocus?: boolean): void {
+    const card = this.card().nativeElement;
+    if (!(hadFocus ?? card.contains(card.ownerDocument.activeElement))) return;
+    afterNextRender(
+      () => {
+        const active = card.ownerDocument.activeElement;
+        if (card.isConnected && (active === card.ownerDocument.body || card.contains(active))) {
+          card.focus();
+        }
+      },
+      { injector: this.#injector },
+    );
+  }
+
+  protected outcomeLabel(record: AlarmApprovalAuditEntry): string {
+    if (record.outcome === 'executed') return 'Approved · alarm raised';
+    if (record.outcome === 'failed') return `Approved · execution failed: ${record.error}`;
+    return 'Rejected · no alarm was raised';
+  }
+}
