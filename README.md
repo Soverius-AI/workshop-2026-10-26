@@ -1,4 +1,4 @@
-# AI Engineering · Unit 1 solution
+# AI Engineering · Unit 2 solution
 
 Install and start **Docker Desktop**. Allow **30 GB of free disk space**.
 
@@ -37,3 +37,15 @@ node workshop/exercises/pi.mts "Read workshop/corpus/company-documents/cooling-r
 ```
 
 Load Gemma manually in http://localhost:8080 first. The provided `pdf-to-text.mts`, `chunk-fixed.mts` and `chunk-paragraph.mts` utilities are used during Unit 2. The completed embedding script is on `solution-unit-2`.
+
+## Run the Unit 2 code
+
+Extract and chunk a PDF, then manually unload Gemma and load `workshop-embed` in llama-server:
+
+```sh
+node workshop/exercises/pdf-to-text.mts workshop/corpus/reference-documents/optyma-cooler.pdf optyma.txt
+node workshop/exercises/chunk-paragraph.mts optyma.txt optyma-paragraph.json
+node workshop/exercises/embed.mts optyma-paragraph.json embeddings.json
+```
+
+Upload `embeddings.json` to the Explorer. Use its PostgreSQL console and retrieval views to store and search the passages. This branch includes all Unit 1 code.
