@@ -5,3 +5,8 @@
 **/.git
 models
 workshop/output
+
+**/.mastra
+apps/incident-system/backend/data
+workshop/qa
+workshop/downloads
