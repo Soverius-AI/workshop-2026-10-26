@@ -28,7 +28,7 @@ docker compose -f workshop/compose.yaml run --rm lab store
 3. **PostgreSQL:** import the artifact in the UI or use `lab store`. Import atomically replaces the practice corpus. Use the console to INSERT, SELECT, inspect `vector_dims(embedding)` and compare vectors with `<=>` (cosine distance). Each console request has a separate restricted `lab_writer` connection; prepared protocol rejects multiple statements. The console is a local SQL playground, not an untrusted public SQL service.
 4. **Retrieval:** ask “The cooling room is too warm. What should I do?” using vector search. Inspect the passages and SQL before generation. Compare keyword search with shorter terms such as “cooling”. PostgreSQL plain full-text queries combine terms; this is not BM25 or hybrid search. Exact search suits this small corpus; no HNSW/IVFFlat index is created.
 
-The shared Explorer image contains no embedding-script solution or `lab embed` shortcut. Participants write their own script in 02.3; the completed script is available on `unit-3`.
+The shared Explorer image contains no embedding-script solution or `lab embed` shortcut. Participants write their own script in 02.3; the completed script is available on `solution-unit-2`.
 
 ## Sources and preparation
 
