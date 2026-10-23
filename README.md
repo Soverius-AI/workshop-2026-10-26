@@ -1,4 +1,4 @@
-# AI Engineering · Participant preparation
+# AI Engineering · Unit 1 solution
 
 Install and start **Docker Desktop**. Allow **30 GB of free disk space**.
 
@@ -25,3 +25,15 @@ The other services keep running. Press **Ctrl+C** to stop; the downloaded models
 - `solution-unit-2`: completed Unit 2; start Unit 3 from here.
 
 Slides and exercise instructions are provided on the participant website. The presenter desk is private.
+
+## Run the Unit 1 code
+
+Install Node.js 24.12 or newer, then run from the repository root:
+
+```sh
+npm ci --prefix workshop/exercises
+node workshop/exercises/client.mts
+node workshop/exercises/pi.mts "Read workshop/corpus/company-documents/cooling-room-incident.md and write a short factual summary to factory-summary.txt."
+```
+
+Load Gemma manually in http://localhost:8080 first. The provided `pdf-to-text.mts`, `chunk-fixed.mts` and `chunk-paragraph.mts` utilities are used during Unit 2. The completed embedding script is on `solution-unit-2`.
