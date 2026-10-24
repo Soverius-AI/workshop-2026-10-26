@@ -21,9 +21,9 @@ import {
   type SqlGenerationFunction,
 } from "./agents/sql-generator-agent";
 import {
-  createJevSqlReviewFunction,
+  createSqlReviewFunction,
   type SqlReviewFunction,
-} from "./agents/jev-sql-reviewer";
+} from "./agents/sql-reviewer";
 
 const POLICY_VERSION = "historian-v1";
 
@@ -42,7 +42,7 @@ export function createHistorianQueryWorkflow(
     dependencies.generateSql ??
     createSqlGenerationFunction(createSqlGeneratorAgent(apiKey, model));
   const reviewSqlProposal =
-    dependencies.reviewSql ?? createJevSqlReviewFunction(apiKey);
+    dependencies.reviewSql ?? createSqlReviewFunction(apiKey, model);
 
   return createWorkflow({
     id: "historian-query",
@@ -125,11 +125,11 @@ function createAgenticSqlCheck(reviewSqlProposal: SqlReviewFunction) {
   return createStep({
     id: "review-sql",
     description:
-      "Ask Jev about query safety, human intent, and stored reading columns.",
+      "Ask the configured model about query safety, human intent, and stored reading columns.",
     inputSchema: generatedSqlSchema,
     outputSchema: reviewedSqlSchema,
     execute: async ({ inputData, writer, runId, abortSignal }) => {
-      await reportProgress(writer, runId, "Reviewing SQL with Jev…", 50);
+      await reportProgress(writer, runId, "Reviewing SQL…", 50);
       // Presentation pause: keep the agentic review visible for two seconds.
       await delay(2_000, undefined, { signal: abortSignal });
       let review: SqlReview;
@@ -163,7 +163,7 @@ function createValidateAndExecuteStep(
         await reportProgress(
           writer,
           runId,
-          "Query rejected by Jev",
+          "Query rejected by the SQL reviewer",
           50,
           "rejected",
         );

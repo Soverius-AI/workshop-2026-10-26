@@ -16,10 +16,9 @@ const storagePath = resolve(
 );
 mkdirSync(dirname(storagePath), { recursive: true });
 
-const apiKey = process.env["OPENROUTER_API_KEY"];
-if (!apiKey) throw new Error("OPENROUTER_API_KEY is required.");
+const apiKey = process.env["LLM_API_KEY"] || "";
 
-const model = process.env["OPENROUTER_MODEL"] || "google/gemma-4-31b-it";
+const model = process.env["LLM_MODEL"] || "Gemma";
 const facilityBaseUrl =
   process.env["FACILITY_BASE_URL"] || "http://127.0.0.1:3101";
 

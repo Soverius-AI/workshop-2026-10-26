@@ -55,28 +55,21 @@ Upload `embeddings.json` to the Explorer. Use its PostgreSQL console and retriev
 
 ## AI DevCraft application · Unit 3
 
-This checkpoint restores the incident-management agent from AI DevCraft commit `021033c11b5549d95fd35f698a3049e74332a2c4` (`source/ai-devcraft-2026-09-30`). The agent workspace moved from `apps/agent-service` to `apps/incident-system/agent`; relative configuration paths and cross-platform launch commands were adjusted. Agent, tool, SQL generator, reviewer, workflow and schema implementations are unchanged.
+This checkpoint adapts AI DevCraft commit `021033c11b5549d95fd35f698a3049e74332a2c4` to the workshop layout. The conversation, SQL generation and SQL review use the same configured model. The default is Gemma through the local Docker llama-server at http://127.0.0.1:8080/v1, with no API key.
 
-The original application uses OpenRouter for the conversational and SQL-generation agents, and Jev for semantic SQL review. These are hosted requests and require your own OpenRouter key. Do not put the key in Git.
+The four-stage workflow is SQL generation → deterministic preflight → model review → facility-owned validation and execution. Jev and its hosted decisions endpoint are removed. Reviewer errors stop the query; there is no automatic approval or cloud fallback.
 
-Create `.env` using `.env.example` as the template, or update your existing `.env`. Put your key in it before starting. From the repository root:
+Load Gemma manually in llama-server. From this checkout's root:
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm dev
 ```
 
- The supplied application scripts follow the webcast's development setup; the Mastra service runs at port 4211 and the incident frontend at 4300.
+If the preparation Docker frontend occupies port 4300, stop only that frontend with `docker compose stop incident` before running the native frontend. The Mastra service listens on 4211; the native facility backend uses 3101.
 
-The preparation stack also uses port 4300 for the Docker incident frontend. Stop only that frontend with `docker compose stop incident` before running the native frontend. PostgreSQL, Explorer and llama-server can remain running. If your Docker incident-backend is running, the native application starts a separate local SQLite backend on port 3101.
+OpenRouter is optional. Create an ignored `.env` with `LLM_BASE_URL=https://openrouter.ai/api/v1`, a valid `LLM_MODEL` and your `LLM_API_KEY`. The same settings apply to chat, SQL generation and review. Keep credentials out of Git. The local default works without `.env` or an account.
 
-The reviewed historian workflow has four stages:
+Progress events, frontend tools and the `review_alarm` approval interaction retain the webcast structure. Historian rows go directly to the UI; the conversational agent receives a completion message.
 
-1. Generate a structured SQL proposal with the dedicated SQL agent.
-2. Reject prohibited SQL deterministically before review.
-3. Review meaning and intent with Jev.
-4. Apply the review decision, then validate and execute the exact query through the facility service.
-
-Progress events feed the existing UI. The application also exposes frontend view/filter tools and the `review_alarm` human-approval interaction. The original chat agent receives a completion message, while historian results are displayed directly in the UI.
-
-This restores the webcast implementation. It does not claim a fresh live-model rehearsal or add a RAG tool to the conversational agent.
+Local model quality, tool calling and performance still require a live rehearsal. A second review call to the same model is not an independent model or a security guarantee; deterministic execution policy remains the final gate.

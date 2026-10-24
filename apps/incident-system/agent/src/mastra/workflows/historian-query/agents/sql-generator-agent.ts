@@ -29,9 +29,9 @@ export type SqlGenerationFunction = (
 ) => Promise<SqlGeneration>;
 
 export const createSqlGeneratorAgent = (apiKey: string, model: string) => {
-  const openrouter = createOpenAI({
+  const provider = createOpenAI({
     apiKey,
-    baseURL: "https://openrouter.ai/api/v1",
+    baseURL: process.env["LLM_BASE_URL"] || "http://127.0.0.1:8080/v1",
   });
 
   return new Agent({
@@ -40,7 +40,7 @@ export const createSqlGeneratorAgent = (apiKey: string, model: string) => {
     description:
       "Turns one facility historian question into a structured read-only SQLite query proposal.",
     instructions: SQL_GENERATOR_INSTRUCTIONS,
-    model: openrouter(model),
+    model: provider.chat(model),
   });
 };
 
