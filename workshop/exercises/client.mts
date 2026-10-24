@@ -1,12 +1,12 @@
 import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "http://127.0.0.1:8080/v1",
-  apiKey: "",
+  baseURL: process.env.LLM_BASE_URL,
+  apiKey: process.env.LLM_API_KEY,
 });
 
 const result = await client.chat.completions.create({
-  model: "Gemma",
+  model: process.env.LLM_MODEL!,
   messages: [
     {
       role: "system",

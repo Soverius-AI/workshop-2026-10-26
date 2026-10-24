@@ -5,13 +5,13 @@ import { readFile, writeFile } from 'node:fs/promises';
 const [inputPath, outputPath] = process.argv.slice(2);
 const data = JSON.parse(await readFile(inputPath, 'utf8'));
 const client = new OpenAI({
-  baseURL: 'http://127.0.0.1:8080/v1',
-  apiKey: '',
+  baseURL: process.env.EMBED_BASE_URL,
+  apiKey: process.env.EMBED_API_KEY,
 });
 
 for (const chunk of data.chunks) {
   const result = await client.embeddings.create({
-    model: 'workshop-embed',
+    model: process.env.EMBED_MODEL!,
     input: 'title: none | text: ' + chunk.text,
     encoding_format: 'float',
   });
@@ -20,7 +20,7 @@ for (const chunk of data.chunks) {
 
 data.kind = 'embeddings';
 data.embedding = {
-  model: 'workshop-embed',
+  model: process.env.EMBED_MODEL!,
   documentPrefix: 'title: none | text: ',
 };
 await writeFile(outputPath, JSON.stringify(data, null, 2));

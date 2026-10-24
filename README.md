@@ -21,6 +21,8 @@ The other services keep running. Press **Ctrl+C** to stop; the downloaded models
 
 All branches include the same Docker services and dependencies. Preparation builds them once; switching to a solution branch does not require another package download. Cached models are reused without contacting Hugging Face. Local llama-server is the default; `.env.example` documents the optional OpenRouter settings.
 
+Before Unit 1, copy `.env.example` to `.env`. Set `LLM_BASE_URL`, `LLM_MODEL` and `LLM_API_KEY` there for local llama.cpp or OpenRouter. The same settings apply to the client, Pi, incident chat, Explorer grounding and Mastra. `EMBED_*` configures the separate embedding model. Compose reads `.env` automatically. The Docker-local URL is `http://llama:8080/v1`; when running Node directly, use `http://localhost:8080/v1` and `node --env-file=.env`.
+
 Run your TypeScript files with the prepared Node.js container:
 
 ```sh
@@ -47,7 +49,7 @@ docker compose run --rm exercises node workshop/exercises/client.mts
 docker compose run --rm exercises node workshop/exercises/pi.mts "Read workshop/corpus/company-documents/cooling-room-incident.md and write a short factual summary to factory-summary.txt."
 ```
 
-Load Gemma manually in http://localhost:8080 first. The provided `pdf-to-text.mts`, `chunk-fixed.mts` and `chunk-paragraph.mts` utilities are used during Unit 2. The completed embedding script is on `solution-unit-2`.
+For local inference, load Gemma manually in http://localhost:8080 first. The provided `pdf-to-text.mts`, `chunk-fixed.mts` and `chunk-paragraph.mts` utilities are used during Unit 2. The completed embedding script is on `solution-unit-2`.
 
 ## Run the Unit 2 code
 

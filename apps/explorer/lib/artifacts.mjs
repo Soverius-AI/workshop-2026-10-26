@@ -48,7 +48,7 @@ export function cosine(a,b) {
   return dot/Math.sqrt(aa*bb);
 }
 export function embeddingConfig() {
-  return {model:process.env.EMBED_MODEL??'workshop-embed',spaceId:process.env.EMBED_SPACE_ID??'workshop-embed-v1',documentPrefix:process.env.DOCUMENT_PREFIX??'title: none | text: ',queryPrefix:process.env.QUERY_PREFIX??'task: search result | query: '};
+  return {model:process.env.EMBED_MODEL,spaceId:process.env.EMBED_SPACE_ID??'workshop-embed-v1',documentPrefix:process.env.DOCUMENT_PREFIX??'title: none | text: ',queryPrefix:process.env.QUERY_PREFIX??'task: search result | query: '};
 }
 export function resolveEmbeddingConfig(embedding,config=embeddingConfig()) {
   if(!embedding || embedding.model!==config.model || embedding.documentPrefix!==config.documentPrefix) throw Error('Imported vectors use a different model or document prefix. Re-embed with the current lab settings.');
@@ -62,7 +62,7 @@ export async function modelRequest(base,path,body,key) {
 }
 export async function embedTexts(texts,purpose='document') {
   const config=embeddingConfig(),prefix=purpose==='query'?config.queryPrefix:config.documentPrefix;
-  const r=await modelRequest(process.env.EMBED_BASE_URL??'http://host.docker.internal:8081/v1','/embeddings',{model:config.model,input:texts.map(t=>prefix+t)},process.env.EMBED_API_KEY);
+  const r=await modelRequest(process.env.EMBED_BASE_URL,'/embeddings',{model:config.model,input:texts.map(t=>prefix+t)},process.env.EMBED_API_KEY);
   const rows=r.data;
   if(!Array.isArray(rows)||rows.length!==texts.length) throw Error('Invalid embedding response');
   const sorted=[...rows].sort((a,b)=>a.index-b.index);
