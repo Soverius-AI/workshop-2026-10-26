@@ -40,7 +40,7 @@ const server = createFacilityServer(
   telemetry,
   investigate,
   historian,
-  process.argv.includes("--local")
+  (process.argv.includes("--local") || process.env["FACILITY_CHAT_MODE"] === "local")
     ? undefined
     : createWorkshopCopilotRuntime({
         mastraBaseUrl:

@@ -1,23 +1,18 @@
 name: soverius-rag-lab
 services:
   download-models:
-    image: python:3.10-slim-bookworm
+    image: soverius/workshop-model-download:offline-v1
+    build: {context: ., dockerfile: infrastructure/Dockerfile.download}
     init: true
     network_mode: bridge
     restart: "no"
     stop_grace_period: 2s
     volumes: ["./models:/models"]
-    entrypoint: ["/bin/sh", "-ec"]
-    command:
-      - |
-        pip install --no-cache-dir 'huggingface_hub[cli]==0.35.3'
-        hf download ggml-org/gemma-4-12B-it-GGUF gemma-4-12B-it-Q4_0.gguf --cache-dir /models
-        exec hf download ggml-org/embeddinggemma-300M-GGUF embeddinggemma-300M-Q8_0.gguf --cache-dir /models
   llama:
     image: ghcr.io/ggml-org/llama.cpp:server@sha256:559ac229adefe0f7e2d4e32f5222f26927b6bb8ba44b9db08e2544afebf41984
     init: true
     ports: ["127.0.0.1:${LLAMA_PORT:-8080}:8080"]
-    environment: {LLAMA_CACHE: /models}
+    environment: {LLAMA_CACHE: /models, LLAMA_ARG_OFFLINE: "1"}
     volumes: ["./models:/models", "./workshop/llama:/config:ro"]
     command: ["--host", "0.0.0.0", "--port", "8080", "--models-preset", "/config/models.ini", "--models-max", "1", "--no-models-autoload"]
   postgres:
@@ -61,15 +56,18 @@ services:
       timeout: 3s
       retries: 20
   incident-backend:
-    image: soverius/incident-backend:local
+    image: soverius/incident-backend:offline-v1
     build: {context: ., dockerfile: apps/incident-system/Dockerfile, target: incident-backend}
     init: true
     environment:
       FACILITY_HOST: 0.0.0.0
+      FACILITY_CHAT_MODE: ${FACILITY_CHAT_MODE:-local}
+      MASTRA_BASE_URL: http://mastra:4211
       LLM_BASE_URL: ${LLM_BASE_URL:-http://llama:8080/v1}
       LLM_MODEL: ${LLM_MODEL:-Gemma}
       LLM_API_KEY: ${LLM_API_KEY:-}
       FACILITY_DB_PATH: /data/facility.sqlite
+    ports: ["127.0.0.1:${FACILITY_PORT:-3101}:3101"]
     volumes: ["incident-data:/data"]
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3101/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
@@ -77,11 +75,47 @@ services:
       timeout: 3s
       retries: 20
   incident:
-    image: soverius/incident:local
+    image: soverius/incident:offline-v1
     build: {context: ., dockerfile: apps/incident-system/Dockerfile, target: incident}
     ports: ["127.0.0.1:${INCIDENT_PORT:-4300}:80"]
     depends_on:
       incident-backend: {condition: service_healthy}
+  mastra:
+    image: soverius/workshop-mastra:offline-v1
+    build: {context: ., dockerfile: apps/incident-system/Dockerfile, target: mastra}
+    init: true
+    ports: ["127.0.0.1:${MASTRA_PORT:-4211}:4211"]
+    environment:
+      MASTRA_HOST: 0.0.0.0
+      MASTRA_PORT: 4211
+      MASTRA_TELEMETRY_DISABLED: "1"
+      MASTRA_STORAGE_PATH: /data/mastra.sqlite
+      FACILITY_BASE_URL: http://incident-backend:3101
+      LLM_BASE_URL: ${LLM_BASE_URL:-http://llama:8080/v1}
+      LLM_MODEL: ${LLM_MODEL:-Gemma}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./apps/incident-system/agent/src:/app/apps/incident-system/agent/src
+      - mastra-data:/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4211/api/agents').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+  exercises:
+    image: soverius/workshop-exercises:offline-v1
+    build: {context: ., dockerfile: infrastructure/Dockerfile.exercises}
+    init: true
+    network_mode: service:llama
+    depends_on: [llama]
+    environment:
+      LLM_BASE_URL: ${LLM_BASE_URL:-http://127.0.0.1:8080/v1}
+      LLM_MODEL: ${LLM_MODEL:-Gemma}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+    volumes:
+      - .:/workspace
+      - exercise-deps:/workspace/workshop/exercises/node_modules
   model-inspect:
     image: soverius/model-inspect:local
     build: {context: ./infrastructure, dockerfile: Dockerfile.inspect}
@@ -92,6 +126,8 @@ volumes:
   rag-data:
     name: soverius-rag-lab_rag-data
   incident-data:
+  mastra-data:
+  exercise-deps:
 networks:
   default:
     ipam:
