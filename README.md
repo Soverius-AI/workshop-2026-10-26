@@ -15,16 +15,26 @@ Wait for `download-models` to exit with **code 0**, then check that these pages 
 - [Incident management](http://localhost:4300)
 - [RAG Lab Explorer](http://localhost:4341) — login: **operator / workshop**
 - [llama-server](http://localhost:8080)
+- [Mastra Studio](http://localhost:4211) — empty until Unit 3
 
 The other services keep running. Press **Ctrl+C** to stop; the downloaded models remain available for the workshop.
 
-Local llama-server is the default. Optional OpenRouter settings are documented in `.env.example`; no cloud key is needed for the local exercises.
+All branches include the same Docker services and dependencies. Preparation builds them once; switching to a solution branch does not require another package download. Cached models are reused without contacting Hugging Face. Local llama-server is the default; `.env.example` documents the optional OpenRouter settings.
+
+Run your TypeScript files with the prepared Node.js container:
+
+```sh
+docker compose run --rm exercises node workshop/exercises/YOUR_FILE.mts
+```
+
+Edit files in your checkout; generated files appear there too. Keep the Docker images, volumes and `models/` directory. Clone this repository (rather than downloading a ZIP) while online so all solution branches are available offline.
 
 ## Code checkpoints
 
 - `preparation`: shared setup and supplied runtime helpers.
 - `solution-unit-1`: completed Unit 1; start Unit 2 from here.
 - `solution-unit-2`: completed Unit 2; start Unit 3 from here.
+- `solution-unit-3`: completed Unit 3.
 
 Slides and exercise instructions are provided on the participant website. The presenter desk is private.
 
