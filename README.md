@@ -18,6 +18,8 @@ Wait for `download-models` to exit with **code 0**, then check that these pages 
 
 The other services keep running. Press **Ctrl+C** to stop; the downloaded models remain available for the workshop.
 
+Local llama-server is the default. Optional OpenRouter settings are documented in `.env.example`; no cloud key is needed for the local exercises.
+
 ## Code checkpoints
 
 - `preparation`: shared setup and supplied runtime helpers.
