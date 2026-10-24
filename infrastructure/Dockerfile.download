@@ -1,0 +1,5 @@
+FROM python:3.10-slim-bookworm
+RUN pip install --no-cache-dir 'huggingface_hub[cli]==0.35.3'
+COPY infrastructure/download-models.py /download-models.py
+ENV HF_HUB_DISABLE_TELEMETRY=1 HF_HUB_DISABLE_XET=1
+ENTRYPOINT ["python", "-u", "/download-models.py"]

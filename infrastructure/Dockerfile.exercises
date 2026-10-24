@@ -1,0 +1,5 @@
+FROM node:24-bookworm-slim
+WORKDIR /workspace
+COPY workshop/exercises/package.json workshop/exercises/package-lock.json ./workshop/exercises/
+RUN npm ci --prefix workshop/exercises
+CMD ["node", "--version"]

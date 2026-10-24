@@ -1,0 +1,25 @@
+{
+  "name": "@packt-workshop/agent-service",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "mastra build --studio",
+    "dev": "mastra dev --env ../../../.env",
+    "start": "mastra start --env ../../../.env"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^3.0.101",
+    "@mastra/core": "1.62.0",
+    "@mastra/libsql": "1.22.0",
+    "@mastra/observability": "1.17.2",
+    "@packt-workshop/contracts": "workspace:*",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "mastra": "1.26.1",
+    "tsx": "4.23.12",
+    "typescript": "~6.0.2"
+  }
+}
