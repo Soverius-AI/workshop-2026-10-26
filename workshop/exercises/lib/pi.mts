@@ -6,11 +6,11 @@ import {
 export async function createWorkshopAgent(customTools: ToolDefinition[] = []) {
   const modelRuntime = await ModelRuntime.create({modelsPath: null, refreshOnCreate: false});
   modelRuntime.registerProvider('workshop', {
-    baseUrl: process.env.LLM_BASE_URL || 'http://127.0.0.1:8080/v1',
+    baseUrl: process.env.LLM_BASE_URL,
     api: 'openai-completions',
     apiKey: process.env.LLM_API_KEY || 'local', // Pi requires a placeholder; llama-server has no authentication.
     authHeader: Boolean(process.env.LLM_API_KEY),
-    models: [{id: process.env.LLM_MODEL || 'Gemma', name: 'Gemma', reasoning: false, input: ['text'],
+    models: [{id: process.env.LLM_MODEL!, name: process.env.LLM_MODEL!, reasoning: false, input: ['text'],
       contextWindow: 8192, maxTokens: 4096,
       cost: {input: 0, output: 0, cacheRead: 0, cacheWrite: 0}}],
   });
@@ -25,7 +25,7 @@ export async function createWorkshopAgent(customTools: ToolDefinition[] = []) {
   });
   await resourceLoader.reload();
   const {session} = await createAgentSession({
-    modelRuntime, model: modelRuntime.getModel('workshop', process.env.LLM_MODEL || 'Gemma'),
+    modelRuntime, model: modelRuntime.getModel('workshop', process.env.LLM_MODEL!),
     thinkingLevel: 'off', resourceLoader, settingsManager,
     sessionManager: SessionManager.inMemory(),
     tools: ['read', 'write', ...customTools.map(tool => tool.name)], customTools,
