@@ -35,6 +35,7 @@ Approve only when all checks pass. Otherwise return concise concerns.`,
       modelSettings: { temperature: 0, maxOutputTokens: 1_000 },
       structuredOutput: { schema: reviewSchema, jsonPromptInjection: "auto" },
     });
-    return reviewSchema.parse(result.object);
+    const review = reviewSchema.parse(result.object);
+    return { ...review, approved: review.approved && review.concerns.length === 0 };
   };
 }
