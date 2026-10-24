@@ -49,8 +49,9 @@ services:
       EMBED_SPACE_ID: workshop-embed-v1
       DOCUMENT_PREFIX: "title: none | text: "
       QUERY_PREFIX: "task: search result | query: "
-      CHAT_BASE_URL: http://llama:8080/v1
-      CHAT_MODEL: Gemma
+      CHAT_BASE_URL: ${LLM_BASE_URL:-http://llama:8080/v1}
+      CHAT_MODEL: ${LLM_MODEL:-Gemma}
+      CHAT_API_KEY: ${LLM_API_KEY:-}
     volumes: ["./workshop/corpus/reference-documents:/pdfs:ro"]
     depends_on:
       postgres: {condition: service_healthy}
@@ -65,6 +66,9 @@ services:
     init: true
     environment:
       FACILITY_HOST: 0.0.0.0
+      LLM_BASE_URL: ${LLM_BASE_URL:-http://llama:8080/v1}
+      LLM_MODEL: ${LLM_MODEL:-Gemma}
+      LLM_API_KEY: ${LLM_API_KEY:-}
       FACILITY_DB_PATH: /data/facility.sqlite
     volumes: ["incident-data:/data"]
     healthcheck:
