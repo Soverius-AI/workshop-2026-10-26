@@ -24,7 +24,7 @@ All branches include the same Docker services and dependencies. Preparation buil
 Run your TypeScript files with the prepared Node.js container:
 
 ```sh
-docker compose run --rm exercises node workshop/exercises/YOUR_FILE.mts
+docker compose run --rm exercises docker compose run --rm exercises node workshop/exercises/YOUR_FILE.mts
 ```
 
 Edit files in your checkout; generated files appear there too. Keep the Docker images, volumes and `models/` directory. Clone this repository (rather than downloading a ZIP) while online so all solution branches are available offline.
@@ -40,12 +40,11 @@ Slides and exercise instructions are provided on the participant website. The pr
 
 ## Run the Unit 1 code
 
-Install Node.js 24.12 or newer, then run from the repository root:
+From the repository root, run your files with the prepared Node container:
 
 ```sh
-npm ci --prefix workshop/exercises
-node workshop/exercises/client.mts
-node workshop/exercises/pi.mts "Read workshop/corpus/company-documents/cooling-room-incident.md and write a short factual summary to factory-summary.txt."
+docker compose run --rm exercises node workshop/exercises/client.mts
+docker compose run --rm exercises node workshop/exercises/pi.mts "Read workshop/corpus/company-documents/cooling-room-incident.md and write a short factual summary to factory-summary.txt."
 ```
 
 Load Gemma manually in http://localhost:8080 first. The provided `pdf-to-text.mts`, `chunk-fixed.mts` and `chunk-paragraph.mts` utilities are used during Unit 2. The completed embedding script is on `solution-unit-2`.
