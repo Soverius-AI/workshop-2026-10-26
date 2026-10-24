@@ -24,7 +24,7 @@ All branches includethe same Docker services and dependencies. Preparation build
 Run your TypeScript files with the prepared Node.js container:
 
 ```sh
-docker compose run --rm exercises docker compose run --rm exercises node workshop/exercises/YOUR_FILE.mts
+docker compose run --rm exercises node workshop/exercises/YOUR_FILE.mts
 ```
 
 Edit files in your checkout; generated files appear there too. Keep the Docker images, volumes and `models/` directory. Clone this repository (rather than downloading a ZIP) while online so all solution branches are available offline.
