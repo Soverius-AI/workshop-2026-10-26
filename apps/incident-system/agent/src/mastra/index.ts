@@ -31,7 +31,10 @@ export const historianQueryWorkflow = createHistorianQueryWorkflow(
 export const mainAgent = createMainAgent(apiKey, model, historianQueryWorkflow);
 
 export const mastra = new Mastra({
-  server: { port: Number(process.env["MASTRA_PORT"] || "4211") },
+  server: {
+    host: process.env["MASTRA_HOST"] || "127.0.0.1",
+    port: Number(process.env["MASTRA_PORT"] || "4211"),
+  },
   agents: { default: mainAgent },
   workflows: { historianQueryWorkflow },
   storage: new LibSQLStore({
