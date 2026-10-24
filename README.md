@@ -31,7 +31,7 @@ Edit files in your checkout; generated files appear there too. Keep the Docker i
 
 ## Code checkpoints
 
-- `preparation`: shared setup and supplied runtime helpers.
+- `preparation`: shared setup, runtime helpers and supplied PDF/chunking utilities.
 - `solution-unit-1`: completed Unit 1; start Unit 2 from here.
 - `solution-unit-2`: completed Unit 2; start Unit 3 from here.
 - `solution-unit-3`: AI DevCraft incident application with the completed Mastra/SQL and UI integrations.
