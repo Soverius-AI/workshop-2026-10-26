@@ -61,6 +61,7 @@ services:
     init: true
     environment:
       FACILITY_HOST: 0.0.0.0
+      COPILOTKIT_TELEMETRY_DISABLED: "true"
       FACILITY_CHAT_MODE: ${FACILITY_CHAT_MODE:-local}
       MASTRA_BASE_URL: http://mastra:4211
       LLM_BASE_URL: ${LLM_BASE_URL:-http://llama:8080/v1}
