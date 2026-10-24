@@ -19,7 +19,7 @@ Wait for `download-models` to exit with **code 0**, then check that these pages 
 
 The other services keep running. Press **Ctrl+C** to stop; the downloaded models remain available for the workshop.
 
-All branches includethe same Docker services and dependencies. Preparation builds them once; switching to a solution branch does not require another package download. Cached models are reused without contacting Hugging Face. Local llama-server is the default; `.env.example` documents the optional OpenRouter settings.
+All branches include the same Docker services and dependencies. Preparation builds them once; switching to a solution branch does not require another package download. Cached models are reused without contacting Hugging Face. Local llama-server is the default; `.env.example` documents the optional OpenRouter settings.
 
 Run your TypeScript files with the prepared Node.js container:
 
