@@ -122,7 +122,8 @@ services:
     build: {context: ./infrastructure, dockerfile: Dockerfile.inspect}
     command: ["--help"]
     attach: false
-    volumes: ["./models:/models:ro"]
+    working_dir: /workspace
+    volumes: ["./models:/workspace/models:ro"]
 volumes:
   rag-data:
     name: soverius-rag-lab_rag-data
