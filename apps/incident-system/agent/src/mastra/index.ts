@@ -16,9 +16,9 @@ const storagePath = resolve(
 );
 mkdirSync(dirname(storagePath), { recursive: true });
 
-const apiKey = process.env["LLM_API_KEY"] || "";
+const apiKey = process.env["LLM_API_KEY"]!;
 
-const model = process.env["LLM_MODEL"] || "Gemma";
+const model = process.env["LLM_MODEL"]!;
 const facilityBaseUrl =
   process.env["FACILITY_BASE_URL"] || "http://127.0.0.1:3101";
 

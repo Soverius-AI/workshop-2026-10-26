@@ -14,7 +14,7 @@ const reviewSchema = z.object({
 export function createSqlReviewFunction(apiKey: string, model: string): SqlReviewFunction {
   const provider = createOpenAI({
     apiKey,
-    baseURL: process.env["LLM_BASE_URL"] || "http://127.0.0.1:8080/v1",
+    baseURL: process.env["LLM_BASE_URL"],
   });
   const reviewer = new Agent({
     id: "sql-reviewer",
