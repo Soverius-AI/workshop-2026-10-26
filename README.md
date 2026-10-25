@@ -43,8 +43,8 @@ Edit files in your checkout; generated files appear there too. Keep the Docker i
 
 - `preparation`: shared setup, runtime helpers and supplied PDF/chunking utilities.
 - `solution-unit-1`: completed Unit 1; start Unit 2 from here.
-- `solution-unit-2`: completed Unit 2; start Unit 3 from here.
-- `solution-unit-3`: completed Unit 3.
+- `solution-unit-2`: completed Unit 2 exercises.
+- `solution-unit-3`: final application for the Unit 3 walkthrough.
 
 Slides and exercise instructions are provided on the participant website. The presenter desk is private.
 
