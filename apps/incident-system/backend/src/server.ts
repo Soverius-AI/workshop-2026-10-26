@@ -60,10 +60,12 @@ export const createFacilityServer = (
   investigate: InvestigateHistorian,
   historian?: HistorianQueryExecutor,
   copilotRuntime?: NodeCopilotListener,
-  chat?: (snapshot: unknown, question: string) => Promise<string | null | {
+  chat?: (snapshot: unknown, question: string) => Promise<string | null>,
+  ragChat?: (snapshot: unknown, question: string) => Promise<{
     answer: string | null;
     evidence: { id: string; source: string; title: string; text: string; score: number }[];
     messages: { role: string; content: string }[];
+    toolCall: { name: string; arguments: { question: string } };
   }>,
 ) =>
   createServer(async (request, response) => {
@@ -71,7 +73,9 @@ export const createFacilityServer = (
       const method = request.method ?? "GET";
       const url = new URL(request.url ?? "/", "http://localhost");
 
-      if (method === "POST" && url.pathname === "/api/chat") {
+      if (method === "POST" && ["/api/chat", "/api/rag-chat"].includes(url.pathname)) {
+        const isRag = url.pathname === "/api/rag-chat";
+        const selectedChat = isRag ? ragChat : chat;
         const input = (await readBody(request)) as {
           metricId?: unknown;
           question?: unknown;
@@ -99,8 +103,8 @@ export const createFacilityServer = (
           sendJson(response, 404, { error: "Unknown metric." });
           return;
         }
-        if (!chat) {
-          sendJson(response, 503, { error: "Local chat is unavailable." });
+        if (!selectedChat) {
+          sendJson(response, 503, { error: isRag ? "RAG chat is unavailable." : "Local chat is unavailable." });
           return;
         }
         const snapshot = {
@@ -114,7 +118,7 @@ export const createFacilityServer = (
           source: "Fictional workshop telemetry from SQLite",
         };
         try {
-          const reply = await chat(snapshot, input.question);
+          const reply = await selectedChat(snapshot, input.question);
           sendJson(response, 200, {
             ...(typeof reply === "object" && reply !== null ? reply : { answer: reply }),
             snapshot,
@@ -122,7 +126,9 @@ export const createFacilityServer = (
         } catch (error) {
           console.error("Incident chat failed:", error instanceof Error ? error.message : "Unknown error");
           sendJson(response, 503, {
-            error: "The assistant could not complete the request. Check Gemma, the OpenRouter embedding key and the imported PostgreSQL embeddings.",
+            error: isRag
+              ? "RAG chat could not complete the request. Check chat-rag.mts, the MCP connection, OpenRouter embeddings and the imported corpus."
+              : "The assistant could not complete the request. Check the Unit 1 chat.mts file and model connection.",
           });
         }
         return;

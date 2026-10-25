@@ -55,7 +55,7 @@ For local inference, load Gemma manually in http://localhost:8080 first. The pro
 
 ## Run the Unit 2 code
 
-Extract and chunk a PDF, then manually unload Gemma and load `workshop-embed` in llama-server:
+Extract and chunk a PDF, then embed it with the OpenRouter settings in `.env`:
 
 ```sh
 docker compose run exercises node workshop/exercises/pdf-to-text.mts workshop/corpus/reference-documents/optyma-cooler.pdf optyma.txt
@@ -86,4 +86,6 @@ Progress events, frontend tools and the `review_alarm` approval interaction reta
 Local model quality, tool calling and performance still require a live rehearsal. A second review call to the same model is not an independent model or a security guarantee; deterministic execution policy remains the final gate.
 ## Connect the incident chat to RAG
 
-After importing the new OpenRouter embeddings in Explorer, set `FACILITY_CHAT_MODE=rag` in `.env`. Start `docker compose up llama postgres explorer incident-backend incident` and load Gemma manually. The incident chat retrieves imported passages before asking Gemma to answer. Expand Retrieved Passages and Messages Sent to Gemma to inspect the complete flow.
+After importing the OpenRouter embeddings in Explorer, start `docker compose up llama postgres explorer incident-backend incident` and load Gemma manually. Open http://localhost:4300/?unit=2. The separate RAG chat calls the Explorer MCP tool `search_documents` before asking Gemma to answer. Expand MCP Tool Call, Retrieved Passages and Messages Sent to Gemma. Unit 1 remains available at http://localhost:4300/?unit=1; no backend mode switch is needed.
+
+Unit 1 uses `/api/chat` with the measurement snapshot. Unit 2 uses `/api/rag-chat`. The MCP client setup and dependencies are supplied in preparation.

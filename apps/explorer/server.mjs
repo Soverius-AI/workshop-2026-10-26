@@ -3,6 +3,8 @@ import {readFile} from 'node:fs/promises';
 import {randomBytes,scryptSync,timingSafeEqual} from 'node:crypto';
 import {initialize,practice,readers,storeArtifact,sqlQuery} from './lib/database.mjs';
 import {chunkCorpus,embedTexts,embeddingConfig,modelRequest} from './lib/artifacts.mjs';
+import {search,evidence} from './lib/retrieval.mjs';
+import {handleMcpRequest} from './lib/mcp.mjs';
 const port=Number(process.env.PORT??4341);
 const users=Object.fromEntries(['operator','maintenance'].map(role=>{const salt=randomBytes(16);return [role,{role,salt,hash:scryptSync(process.env.WORKSHOP_PASSWORD??'workshop',salt,32)}];}));
 const sessions=new Map(),failures=new Map();
@@ -11,23 +13,6 @@ function reply(res,status,data){res.writeHead(status,{'Content-Type':'applicatio
 async function body(req){const chunks=[];let bytes=0;for await(const data of req){bytes+=data.length;if(bytes>32*1024*1024)throw Error('Upload is larger than 32 MB');chunks.push(data);}return JSON.parse(Buffer.concat(chunks).toString('utf8')||'{}');}
 function session(req){const token=req.headers.cookie?.split('; ').find(v=>v.startsWith('rag_session='))?.slice(12);const s=sessions.get(token);if(!s||s.expires<Date.now()){sessions.delete(token);return null;}return {...s,token};}
 function checkOrigin(req){const origin=req.headers.origin;const allowed=[process.env.PUBLIC_ORIGIN??'https://explorer.ai-engineering.localhost',`http://localhost:${port}`,`http://127.0.0.1:${port}`];if(!allowed.includes(origin))throw Error('Request origin is not allowed');}
-const evidence=(r)=>r.rows.map(c=>({...c,text:c.content,content:undefined,vector:undefined,embedding:undefined}));
-async function search(b,user){
- const question=String(b.question??'').trim();if(!question||question.length>2000)throw Error('Enter a question (at most 2000 characters).');
- const secure=b.scope==='protected',pool=secure?readers[user.role]:practice,table=secure?'protected.chunks':'practice.chunks';
- const mode=b.mode??'keyword';
- if(mode==='vector'){
-  if(secure)throw Error('The protected demo currently uses keyword retrieval; upload real vectors into the practice database for vector search.');
-  const settings=(await pool.query('SELECT embedding FROM practice.settings WHERE id=1')).rows[0]?.embedding;
-  const config=embeddingConfig();if(!settings||settings.spaceId!==config.spaceId||settings.model!==config.model||settings.documentPrefix!==config.documentPrefix||settings.queryPrefix!==config.queryPrefix)throw Error('Stored vectors and query model do not match. Re-embed and import with the current configuration.');
-  const vector=(await embedTexts([question],'query'))[0];if(vector.length!==settings.dimensions)throw Error('Query dimension mismatch');
-  const sql=`SELECT id,source,title,section,page,content,1-(embedding <=> $1::vector) AS score FROM practice.chunks WHERE space_id=$2 AND embedding IS NOT NULL ORDER BY embedding <=> $1::vector LIMIT 20`;
-  return {question,scope:b.scope,mode,sql,dimensions:vector.length,hits:evidence(await pool.query(sql,[JSON.stringify(vector),config.spaceId]))};
- }
- if(mode!=='keyword')throw Error('Unknown retrieval mode');
- const sql=`WITH query AS (SELECT plainto_tsquery('english',$1) AS q) SELECT id,source,title,section,page,content,ts_rank_cd(to_tsvector('english',content),q) AS score FROM ${table},query WHERE to_tsvector('english',content) @@ q ORDER BY score DESC,id LIMIT 20`;
- return {question,scope:b.scope,mode,sql,hits:evidence(await pool.query(sql,[question]))};
-}
 await initialize();
 const server=createServer(async(req,res)=>{
  res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Cache-Control','no-store');res.setHeader('X-Frame-Options','DENY');
@@ -35,15 +20,15 @@ const server=createServer(async(req,res)=>{
  try{
  const path=new URL(req.url,'http://localhost').pathname;
  if(path==='/api/health'){await practice.query('SELECT 1');return reply(res,200,{status:'ok'});}
- // Service-to-service retrieval is read-only and restricted to imported practice chunks.
- if(path==='/api/retrieve'){
-  if(req.method!=='POST')return reply(res,405,{error:'Method not allowed'});
+ // MCP is server-to-server, read-only and restricted to imported practice chunks.
+ if(path==='/mcp'){
   const token=process.env.RAG_SERVICE_TOKEN;
   if(!token||req.headers.authorization!==`Bearer ${token}`)return reply(res,401,{error:'Invalid retrieval service token'});
+  if(req.headers.origin)checkOrigin(req);
+  if(req.method!=='POST')return reply(res,405,{error:'Method not allowed'});
   if(!req.headers['content-type']?.startsWith('application/json'))return reply(res,415,{error:'Send JSON'});
-  const b=await body(req);
-  const result=await search({question:b.question,scope:'practice',mode:'vector'},{role:'operator'});
-  return reply(res,200,{question:result.question,hits:result.hits.slice(0,5),sql:result.sql});
+  await handleMcpRequest(req,res,await body(req));
+  return;
  }
  if(path.startsWith('/api/') && req.method!=='GET'){checkOrigin(req);if(req.method!=='POST')return reply(res,405,{error:'Method not allowed'});if(!req.headers['content-type']?.startsWith('application/json'))return reply(res,415,{error:'Send JSON'});}
  if(path==='/api/login'&&req.method==='POST'){
