@@ -7,6 +7,6 @@ The Explorer visualizes your JSON chunks and embeddings, provides the PostgreSQL
 
 Retrieval uses vector similarity over the participant’s imported PostgreSQL chunks. Replacing the imported embeddings clears the previous retrieval result. The Security view keeps the separate permission demonstration.
 
-The incident backend can retrieve imported passages through `POST /api/retrieve` using the server-side `RAG_SERVICE_TOKEN`. This endpoint exposes only vector retrieval over the practice corpus; it cannot query protected documents or modify stored data.
+The Explorer exposes the MCP tool `search_documents` over Streamable HTTP at `/mcp`. The incident backend connects with the supplied `rag-mcp-client.mts` and server-side `RAG_SERVICE_TOKEN`. The tool accepts a question and returns passage text, IDs, sources and similarity scores from the imported practice corpus. It cannot query protected documents or modify stored data. Explorer views and MCP both reuse `lib/retrieval.mjs`.
 
 Exercise instructions are provided separately on the participant website. Completed code is on `solution-unit-1` and `solution-unit-2`.
