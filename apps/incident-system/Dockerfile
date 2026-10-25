@@ -14,7 +14,7 @@ RUN pnpm --filter @packt-workshop/contracts build
 FROM dependencies AS incident-backend
 COPY apps/incident-system/backend apps/incident-system/backend
 COPY workshop/exercises workshop/exercises
-RUN npm ci --prefix workshop/exercises --omit=dev && pnpm --filter @packt-workshop/facility-service build && mkdir /data && chown node:node /data
+RUN pnpm --filter @packt-workshop/facility-service build && mkdir /data && chown node:node /data
 USER node
 ENV FACILITY_HOST=0.0.0.0 FACILITY_DB_PATH=/data/facility.sqlite
 EXPOSE 3101
