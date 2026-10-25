@@ -38,13 +38,13 @@ services:
       PGDATABASE: raglab
       ADMIN_PASSWORD: local-workshop-admin
       WORKSHOP_PASSWORD: workshop
-      EMBED_BASE_URL: ${EMBED_BASE_URL:-http://llama:8080/v1}
+      EMBED_BASE_URL: ${EMBED_DOCKER_BASE_URL:-http://llama:8080/v1}
       EMBED_MODEL: ${EMBED_MODEL:-workshop-embed}
       EMBED_API_KEY: ${EMBED_API_KEY:-}
       EMBED_SPACE_ID: workshop-embed-v1
       DOCUMENT_PREFIX: "title: none | text: "
       QUERY_PREFIX: "task: search result | query: "
-      LLM_BASE_URL: ${LLM_BASE_URL:-http://llama:8080/v1}
+      LLM_BASE_URL: ${LLM_DOCKER_BASE_URL:-http://llama:8080/v1}
       LLM_MODEL: ${LLM_MODEL:-Gemma}
       LLM_API_KEY: ${LLM_API_KEY:-}
     volumes: ["./workshop/corpus/reference-documents:/pdfs:ro"]
@@ -64,7 +64,7 @@ services:
       COPILOTKIT_TELEMETRY_DISABLED: "true"
       FACILITY_CHAT_MODE: ${FACILITY_CHAT_MODE:-local}
       MASTRA_BASE_URL: http://mastra:4211
-      LLM_BASE_URL: ${LLM_BASE_URL:-http://llama:8080/v1}
+      LLM_BASE_URL: ${LLM_DOCKER_BASE_URL:-http://llama:8080/v1}
       LLM_MODEL: ${LLM_MODEL:-Gemma}
       LLM_API_KEY: ${LLM_API_KEY:-}
       FACILITY_DB_PATH: /data/facility.sqlite
@@ -92,7 +92,7 @@ services:
       MASTRA_TELEMETRY_DISABLED: "1"
       MASTRA_STORAGE_PATH: /data/mastra.sqlite
       FACILITY_BASE_URL: http://incident-backend:3101
-      LLM_BASE_URL: ${LLM_BASE_URL:-http://llama:8080/v1}
+      LLM_BASE_URL: ${LLM_DOCKER_BASE_URL:-http://llama:8080/v1}
       LLM_MODEL: ${LLM_MODEL:-Gemma}
       LLM_API_KEY: ${LLM_API_KEY:-}
       CHOKIDAR_USEPOLLING: "true"
@@ -110,10 +110,10 @@ services:
     init: true
     depends_on: [llama]
     environment:
-      LLM_BASE_URL: ${LLM_BASE_URL:-http://llama:8080/v1}
+      LLM_BASE_URL: ${LLM_DOCKER_BASE_URL:-http://llama:8080/v1}
       LLM_MODEL: ${LLM_MODEL:-Gemma}
       LLM_API_KEY: ${LLM_API_KEY:-}
-      EMBED_BASE_URL: ${EMBED_BASE_URL:-http://llama:8080/v1}
+      EMBED_BASE_URL: ${EMBED_DOCKER_BASE_URL:-http://llama:8080/v1}
       EMBED_MODEL: ${EMBED_MODEL:-workshop-embed}
       EMBED_API_KEY: ${EMBED_API_KEY:-}
     volumes:
