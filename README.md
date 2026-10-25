@@ -70,3 +70,5 @@ Upload `embeddings.json` to the Explorer. Use its PostgreSQL console and retriev
 After importing the OpenRouter embeddings in Explorer, start `docker compose up llama postgres explorer incident-backend incident` and load Gemma manually. Open http://localhost:4300/?unit=2. The separate RAG chat calls the Explorer MCP tool `search_documents` before asking Gemma to answer. Expand MCP Tool Call, Retrieved Passages and Messages Sent to Gemma. Unit 1 remains available at http://localhost:4300/?unit=1; no backend mode switch is needed.
 
 Unit 1 uses `/api/chat` with the measurement snapshot. Unit 2 uses `/api/rag-chat`. The MCP client setup and dependencies are supplied in preparation.
+
+The MCP transport is supplied. In Unit 2, complete `apps/explorer/lib/search-documents.mts`, then use the tool from the incident backend and Pi. Explorer mounts its `lib` folder so code edits require a restart, not an image rebuild. The completed retrieval, incident chat and Pi scripts belong to `solution-unit-2`.
