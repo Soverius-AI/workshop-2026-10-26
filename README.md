@@ -17,6 +17,8 @@ Wait for `download-models` to exit with **code 0**, then check that these pages 
 - [llama-server](http://localhost:8080)
 - [Mastra Studio](http://localhost:4211) — empty until Unit 3
 
+Gemma loads automatically on the first chat or API request; no manual model selection is needed.
+
 The other services keep running. Press **Ctrl+C** to stop; the downloaded models remain available for the workshop.
 
 Embeddings use **BAAI BGE-M3 through OpenRouter** for both documents and questions. Set `EMBED_API_KEY` in your ignored `.env`; internet access is required for embeddings and live retrieval. Gemma remains local.
