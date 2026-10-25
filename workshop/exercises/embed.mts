@@ -11,14 +11,18 @@ const client = new OpenAI({
   apiKey: process.env.EMBED_API_KEY,
 });
 
-const result = await client.embeddings.create({
-  model: process.env.EMBED_MODEL!,
-  input: data.chunks.map(chunk => chunk.text),
-  encoding_format: 'float',
-});
-data.chunks.forEach((chunk, index) => {
-  chunk.vector = result.data[index].embedding;
-});
+for (let start = 0; start < data.chunks.length; start += 16) {
+  const chunks = data.chunks.slice(start, start + 16);
+  const result = await client.embeddings.create({
+    model: process.env.EMBED_MODEL!,
+    input: chunks.map(chunk => chunk.text),
+    encoding_format: 'float',
+  }, { timeout: 60000, maxRetries: 0 });
+  chunks.forEach((chunk, index) => {
+    chunk.vector = result.data[index].embedding;
+  });
+  console.log(`Embedded ${start + chunks.length}/${data.chunks.length} chunks`);
+}
 
 data.kind = 'embeddings';
 data.embedding = { model: process.env.EMBED_MODEL!, documentPrefix: '' };
