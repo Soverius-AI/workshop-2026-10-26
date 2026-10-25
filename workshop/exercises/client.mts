@@ -1,7 +1,9 @@
 import OpenAI from "openai";
 
+process.loadEnvFile();
+
 const client = new OpenAI({
-  baseURL: process.env.LLM_BASE_URL,
+  baseURL: process.env.LLM_BASE_URL || 'http://localhost:8080/v1',
   apiKey: process.env.LLM_API_KEY,
 });
 
