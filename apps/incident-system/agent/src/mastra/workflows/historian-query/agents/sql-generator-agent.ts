@@ -31,7 +31,7 @@ export type SqlGenerationFunction = (
 export const createSqlGeneratorAgent = (apiKey: string, model: string) => {
   const provider = createOpenAI({
     apiKey,
-    baseURL: process.env["LLM_BASE_URL"],
+    baseURL: process.env["LLM_BASE_URL"]!,
   });
 
   return new Agent({
