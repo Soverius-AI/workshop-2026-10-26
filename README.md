@@ -64,3 +64,7 @@ docker compose run exercises node workshop/exercises/embed.mts optyma-paragraph.
 ```
 
 Upload `embeddings.json` to the Explorer. Use its PostgreSQL console and retrieval views to store and search the passages. This branch includes all Unit 1 code.
+
+## Connect the incident chat to RAG
+
+After importing the new OpenRouter embeddings in Explorer, set `FACILITY_CHAT_MODE=rag` in `.env`. Start `docker compose up llama postgres explorer incident-backend incident` and load Gemma manually. The incident chat retrieves imported passages before asking Gemma to answer. Expand Retrieved Passages and Messages Sent to Gemma to inspect the complete flow.
