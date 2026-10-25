@@ -1,8 +1,8 @@
-import { build } from 'esbuild';
+import { build } from "esbuild";
 
 await build({
-  entryPoints: ['public/app.js'],
+  entryPoints: ["public/app.js"],
   bundle: true,
-  format: 'esm',
-  outfile: 'public/bundle.js',
+  format: "esm",
+  outfile: "public/bundle.js",
 });
