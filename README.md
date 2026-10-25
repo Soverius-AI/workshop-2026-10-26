@@ -86,14 +86,6 @@ docker compose run exercises node workshop/exercises/embed.mts optyma-paragraph.
 
 Upload `embeddings.json` to the Explorer. Use its PostgreSQL console and retrieval views to store and search the passages. This branch includes all Unit 1 code.
 
-## Connect the incident chat to RAG
-
-After importing the OpenRouter embeddings in Explorer, start `docker compose up llama postgres explorer incident-backend incident` and load Gemma manually. Open http://localhost:4300/?unit=2. The separate RAG chat calls the Explorer MCP tool `search_documents` before asking Gemma to answer. Expand MCP Tool Call, Retrieved Passages and Messages Sent to Gemma. Unit 1 remains available at http://localhost:4300/?unit=1; no backend mode switch is needed.
-
-Unit 1 uses `/api/chat` with the measurement snapshot. Unit 2 uses `/api/rag-chat`. The MCP client setup and dependencies are supplied in preparation.
-
-The MCP transport is supplied. In Unit 2, complete `apps/explorer/lib/search-documents.mts`, then use the tool from the incident backend and Pi. Explorer mounts its `lib` folder so code edits require a restart, not an image rebuild. The completed retrieval, incident chat and Pi scripts belong to `solution-unit-2`.
-
 ## Complete the MCP server and use it from Pi
 
 `apps/explorer/lib/search-documents.mts` contains the completed question-embedding and pgvector query. The supplied server calls it for `search_documents`. Restart Explorer after edits; the source folder is mounted.
@@ -110,4 +102,12 @@ Or via Docker:
 docker compose run exercises node workshop/exercises/pi-rag.mts "Use search_documents for: The cooling room is too warm. What should I do? Write a short answer with passage citations to rag-answer.txt. Do not invent live readings or contacts."
 ```
 
-The incident backend calls retrieval explicitly. Pi discovers mcp__explorer__search_documents from Explorer and retains the Unit 1 file tools. Gemma selects the tool, then uses its result to write the answer file.
+Pi discovers mcp__explorer__search_documents from Explorer. The CLI retains the Unit 1 file tools and can write an answer file. The incident backend reuses the same agent with only document search enabled; `chat-rag.mts` passes the trusted measurement snapshot and returns the answer plus the recorded run to the UI.
+
+## Connect the incident chat to RAG
+
+After importing the OpenRouter embeddings in Explorer, start `docker compose up llama postgres explorer incident-backend incident` and load Gemma manually. Open http://localhost:4300/?unit=2. The RAG chat reuses the Pi agent from `workshop/exercises/lib/rag-agent.mts` and adds the selected measurement snapshot. Pi handles the model/tool loop. Expand MCP Tool Calls, Retrieved Passages and Agent Conversation. Unit 1 remains available at http://localhost:4300/?unit=1; no backend mode switch is needed.
+
+Unit 1 uses `/api/chat` with the measurement snapshot. Unit 2 uses `/api/rag-chat`. The MCP client setup and dependencies are supplied in preparation.
+
+The MCP transport is supplied. In Unit 2, complete `apps/explorer/lib/search-documents.mts`, then connect Pi and reuse that agent in the incident backend. Explorer mounts its `lib` folder so code edits require a restart, not an image rebuild. The completed retrieval, incident chat and Pi scripts belong to `solution-unit-2`.
