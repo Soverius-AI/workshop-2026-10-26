@@ -41,3 +41,5 @@ Edit files in your checkout; generated files appear there too. Keep the Docker i
 - `solution-unit-3`: completed Unit 3.
 
 Slides and exercise instructions are provided on the participant website. The presenter desk is private.
+
+Unit 1 uses `/api/chat` with the measurement snapshot. Unit 2 uses `/api/rag-chat`; its separate RAG view calls the Explorer MCP tool `search_documents` before sending the retrieved text to Gemma. The MCP client setup and dependencies are supplied in preparation.

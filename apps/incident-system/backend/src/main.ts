@@ -32,22 +32,28 @@ const investigate = createHistorianInvestigator(
   process.env["MASTRA_BASE_URL"] || "http://127.0.0.1:4211",
 );
 const historian = new HistorianQueryService(databasePath);
-const chatFile = process.env["FACILITY_CHAT_MODE"] === "rag" ? "chat-rag.mts" : "chat.mts";
 const { chat } = await import(
-  new URL(`../../../../workshop/exercises/${chatFile}`, import.meta.url).href
+  new URL('../../../../workshop/exercises/chat.mts', import.meta.url).href
 );
+const ragChat = async (snapshot: unknown, question: string) => {
+  const { chat } = await import(
+    new URL('../../../../workshop/exercises/chat-rag.mts', import.meta.url).href
+  );
+  return chat(snapshot, question);
+};
 const server = createFacilityServer(
   repository,
   telemetry,
   investigate,
   historian,
-  (process.argv.includes("--local") || ["local", "rag"].includes(process.env["FACILITY_CHAT_MODE"] ?? "local"))
+  (process.argv.includes("--local") || (process.env["FACILITY_CHAT_MODE"] ?? "local") === "local")
     ? undefined
     : createWorkshopCopilotRuntime({
         mastraBaseUrl:
           process.env["MASTRA_BASE_URL"] || "http://127.0.0.1:4211",
       }),
   chat,
+  ragChat,
 );
 
 server.listen(port, process.env["FACILITY_HOST"] ?? "127.0.0.1", () => {

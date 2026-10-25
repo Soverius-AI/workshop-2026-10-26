@@ -65,7 +65,7 @@ services:
       COPILOTKIT_TELEMETRY_DISABLED: "true"
       FACILITY_CHAT_MODE: ${FACILITY_CHAT_MODE:-local}
       MASTRA_BASE_URL: http://mastra:4211
-      RAG_BASE_URL: http://explorer:4341
+      RAG_MCP_URL: http://explorer:4341/mcp
       RAG_SERVICE_TOKEN: ${RAG_SERVICE_TOKEN:-local-workshop-rag}
       LLM_BASE_URL: ${LLM_DOCKER_BASE_URL:-http://llama:8080/v1}
       LLM_MODEL: ${LLM_MODEL:-Gemma}
@@ -100,8 +100,6 @@ services:
       MASTRA_TELEMETRY_DISABLED: "1"
       MASTRA_STORAGE_PATH: /data/mastra.sqlite
       FACILITY_BASE_URL: http://incident-backend:3101
-      RAG_BASE_URL: http://explorer:4341
-      RAG_SERVICE_TOKEN: ${RAG_SERVICE_TOKEN:-local-workshop-rag}
       LLM_BASE_URL: ${LLM_DOCKER_BASE_URL:-http://llama:8080/v1}
       LLM_MODEL: ${LLM_MODEL:-Gemma}
       LLM_API_KEY: ${LLM_API_KEY:-}
