@@ -7,8 +7,8 @@ export async function search(b,user){
  const mode=b.mode??'keyword';
  if(mode==='vector'){
   if(secure)throw Error('The protected demo currently uses keyword retrieval; upload real vectors into the practice database for vector search.');
-  const settings=(await pool.query('SELECT embedding FROM practice.settings WHERE id=1')).rows[0]?.embedding;
-  const config=embeddingConfig();if(!settings||settings.spaceId!==config.spaceId||settings.model!==config.model||settings.documentPrefix!==config.documentPrefix||settings.queryPrefix!==config.queryPrefix)throw Error('Stored vectors and query model do not match. Re-embed and import with the current configuration.');
+  const settings=await practiceEmbeddingSpace();
+  const config=embeddingConfig();
   const vector=(await embedTexts([question],'query'))[0];if(vector.length!==settings.dimensions)throw Error('Query dimension mismatch');
   const sql=`SELECT id,source,title,section,page,content,1-(embedding <=> $1::vector) AS score FROM practice.chunks WHERE space_id=$2 AND embedding IS NOT NULL ORDER BY embedding <=> $1::vector LIMIT 20`;
   return {question,scope:b.scope,mode,sql,dimensions:vector.length,hits:evidence(await pool.query(sql,[JSON.stringify(vector),config.spaceId]))};
@@ -18,7 +18,9 @@ export async function search(b,user){
  return {question,scope:b.scope,mode,sql,hits:evidence(await pool.query(sql,[question]))};
 }
 
-export async function retrievePassages(question) {
-  const result=await search({question,scope:'practice',mode:'vector'},{role:'operator'});
-  return {hits:result.hits.slice(0,5)};
+export async function practiceEmbeddingSpace() {
+ const settings=(await practice.query('SELECT embedding FROM practice.settings WHERE id=1')).rows[0]?.embedding;
+ const config=embeddingConfig();
+ if(!settings||settings.spaceId!==config.spaceId||settings.model!==config.model||settings.documentPrefix!==config.documentPrefix||settings.queryPrefix!==config.queryPrefix)throw Error('Stored vectors and query model do not match. Re-embed and import with the current configuration.');
+ return settings;
 }
