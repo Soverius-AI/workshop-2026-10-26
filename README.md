@@ -72,3 +72,15 @@ After importing the OpenRouter embeddings in Explorer, start `docker compose up 
 Unit 1 uses `/api/chat` with the measurement snapshot. Unit 2 uses `/api/rag-chat`. The MCP client setup and dependencies are supplied in preparation.
 
 The MCP transport is supplied. In Unit 2, complete `apps/explorer/lib/search-documents.mts`, then use the tool from the incident backend and Pi. Explorer mounts its `lib` folder so code edits require a restart, not an image rebuild. The completed retrieval, incident chat and Pi scripts belong to `solution-unit-2`.
+
+## Complete the MCP server and use it from Pi
+
+`apps/explorer/lib/search-documents.mts` contains the completed question-embedding and pgvector query. The supplied server calls it for `search_documents`. Restart Explorer after edits; the source folder is mounted.
+
+`workshop/exercises/pi-rag.mts` reuses the Unit 1 Pi helper and forwards its document-search tool to that MCP server:
+
+```sh
+docker compose run exercises node workshop/exercises/pi-rag.mts "Use search_documents for: The cooling room is too warm. What should I do? Write a short answer with passage citations to rag-answer.txt. Do not invent live readings or contacts."
+```
+
+The incident backend calls retrieval explicitly. Pi lets Gemma select the tool, then uses its result to write the answer file.

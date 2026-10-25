@@ -2,6 +2,14 @@ import { practice } from './database.mjs';
 import { embedTexts } from './artifacts.mjs';
 
 export async function searchDocuments(question: string) {
-  // Exercise 02.6: embed the question, query practice.chunks and return { hits: rows }.
-  throw new Error('Complete searchDocuments in exercise 02.6 before calling the MCP tool.');
+  const [vector] = await embedTexts([question], 'query');
+  const { rows } = await practice.query(`
+    SELECT id, source, title, section, page, content AS text,
+           1 - (embedding <=> $1::vector) AS score
+    FROM practice.chunks
+    WHERE space_id = $2 AND embedding IS NOT NULL
+    ORDER BY embedding <=> $1::vector
+    LIMIT 5
+  `, [JSON.stringify(vector), process.env.EMBED_SPACE_ID]);
+  return { hits: rows };
 }
