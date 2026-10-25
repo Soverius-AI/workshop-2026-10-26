@@ -17,6 +17,8 @@ Wait for `download-models` to exit with **code 0**, then check that these pages 
 - [llama-server](http://localhost:8080)
 - [Mastra Studio](http://localhost:4211)
 
+Gemma loads automatically on the first chat or API request; no manual model selection is needed.
+
 The other services keep running. Press **Ctrl+C** to stop; the downloaded models remain available for the workshop.
 
 Embeddings use **BAAI BGE-M3 through OpenRouter** for both documents and questions. Set `EMBED_API_KEY` in your ignored `.env`; internet access is required for embeddings and live retrieval. Gemma remains local.
@@ -64,7 +66,7 @@ docker compose run exercises node workshop/exercises/client.mts
 docker compose run exercises node workshop/exercises/pi.mts "Read workshop/corpus/company-documents/cooling-room-incident.md and write a short factual summary to factory-summary.txt."
 ```
 
-For local inference, load Gemma manually in http://localhost:8080 first. The provided `pdf-to-text.mts`, `chunk-fixed.mts` and `chunk-paragraph.mts` utilities are used during Unit 2. The completed embedding script is on `solution-unit-2`.
+For local inference, keep `docker compose up llama` running. Gemma loads automatically on the first request. The provided `pdf-to-text.mts`, `chunk-fixed.mts` and `chunk-paragraph.mts` utilities are used during Unit 2. The completed embedding script is on `solution-unit-2`.
 
 ## Run the Unit 2 code
 
@@ -106,7 +108,7 @@ Pi discovers mcp__explorer__search_documents from Explorer. The CLI retains the 
 
 ## Connect the incident chat to RAG
 
-After importing the OpenRouter embeddings in Explorer, start `docker compose up llama postgres explorer incident-backend incident` and load Gemma manually. Open http://localhost:4300/?unit=2. The supplied RAG chat component calls `/api/rag-chat`. Its `chat-rag.mts` function uses the same Pi setup and MCP registration as `pi-rag.mts`, passes the question and selected measurement, and returns the answer. Pi handles the model/tool loop. Unit 1 remains available at http://localhost:4300/?unit=1; no backend mode switch is needed.
+After importing the OpenRouter embeddings in Explorer, start `docker compose up llama postgres explorer incident-backend incident`. Open http://localhost:4300/?unit=2. The supplied RAG chat component calls `/api/rag-chat`. Its `chat-rag.mts` function uses the same Pi setup and MCP registration as `pi-rag.mts`, passes the question and selected measurement, and returns the answer. Pi handles the model/tool loop. Unit 1 remains available at http://localhost:4300/?unit=1; no backend mode switch is needed.
 
 Unit 1 uses `/api/chat` with the measurement snapshot. Unit 2 uses `/api/rag-chat`. The MCP client setup and dependencies are supplied in preparation.
 
