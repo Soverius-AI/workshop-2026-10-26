@@ -1,5 +1,7 @@
 import { createWorkshopAgent } from "./lib/pi.mts";
 
+process.loadEnvFile();
+
 const session = await createWorkshopAgent();
 const task = process.argv[2];
 
