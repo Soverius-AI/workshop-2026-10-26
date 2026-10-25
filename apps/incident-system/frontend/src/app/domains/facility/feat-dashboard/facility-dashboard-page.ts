@@ -1,4 +1,6 @@
 import { ChatComponent } from './agent/chat.component';
+import { RagChatComponent } from './agent/rag-chat.component';
+import { AgentChatComponent } from './agent/agent-chat.component';
 import { connectFacilityAgent } from './agent/connect-facility-agent';
 import { AlarmAudit } from '../ui/alarm-audit';
 import { Component, inject } from '@angular/core';
@@ -12,6 +14,8 @@ import { MetricHistory } from '../ui/metric-history';
   selector: 'app-facility-dashboard',
   imports: [
     ChatComponent,
+    RagChatComponent,
+    AgentChatComponent,
     AlarmAudit,
     FacilityHeader,
     ReadingFilters,
@@ -173,7 +177,11 @@ import { MetricHistory } from '../ui/metric-history';
             </section>
           </section>
 
-          <app-chat />
+          @switch (unit) {
+            @case ('2') { <app-rag-chat /> }
+            @case ('3') { <app-agent-chat /> }
+            @default { <app-chat /> }
+          }
         </div>
       }
 
@@ -323,6 +331,7 @@ import { MetricHistory } from '../ui/metric-history';
   `,
 })
 export class FacilityDashboardPage {
+  protected readonly unit = new URLSearchParams(location.search).get('unit') ?? '1';
   protected readonly store = inject(FacilityStore);
   constructor() {
     if (new URLSearchParams(location.search).get('unit') === '3') connectFacilityAgent();
