@@ -48,7 +48,9 @@ services:
       LLM_BASE_URL: ${LLM_DOCKER_BASE_URL:-http://llama:8080/v1}
       LLM_MODEL: ${LLM_MODEL:-Gemma}
       LLM_API_KEY: ${LLM_API_KEY:-}
-    volumes: ["./workshop/corpus/reference-documents:/pdfs:ro"]
+    volumes:
+      - ./workshop/corpus/reference-documents:/pdfs:ro
+      - ./apps/explorer/lib:/app/lib:ro
     depends_on:
       postgres: {condition: service_healthy}
     healthcheck:
@@ -118,6 +120,8 @@ services:
     init: true
     depends_on: [llama]
     environment:
+      RAG_MCP_URL: http://explorer:4341/mcp
+      RAG_SERVICE_TOKEN: ${RAG_SERVICE_TOKEN:-local-workshop-rag}
       LLM_BASE_URL: ${LLM_DOCKER_BASE_URL:-http://llama:8080/v1}
       LLM_MODEL: ${LLM_MODEL:-Gemma}
       LLM_API_KEY: ${LLM_API_KEY:-}

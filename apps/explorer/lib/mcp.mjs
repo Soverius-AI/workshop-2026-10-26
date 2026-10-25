@@ -1,7 +1,8 @@
 import {McpServer} from '@modelcontextprotocol/sdk/server/mcp.js';
 import {StreamableHTTPServerTransport} from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import {z} from 'zod';
-import {retrievePassages} from './retrieval.mjs';
+import {practiceEmbeddingSpace} from './retrieval.mjs';
+import {searchDocuments} from './search-documents.mts';
 
 export async function handleMcpRequest(request,response,body) {
   const server=new McpServer({name:'workshop-rag',version:'1.0.0'});
@@ -14,7 +15,8 @@ export async function handleMcpRequest(request,response,body) {
     }))},
     annotations:{readOnlyHint:true,destructiveHint:false,idempotentHint:true,openWorldHint:false},
   },async({question})=>{
-    const result=await retrievePassages(question);
+    await practiceEmbeddingSpace();
+    const result=await searchDocuments(question);
     return {structuredContent:result,content:[{type:'text',text:JSON.stringify(result)}]};
   });
   const transport=new StreamableHTTPServerTransport({sessionIdGenerator:undefined,enableJsonResponse:true});
