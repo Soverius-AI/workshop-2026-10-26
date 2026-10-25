@@ -38,7 +38,7 @@ export const createMainAgent = (
 ) => {
   const provider = createOpenAI({
     apiKey,
-    baseURL: process.env["LLM_BASE_URL"]!,
+    baseURL: process.env["LLM_BASE_URL"],
   });
 
   const query_historian = createQueryHistorianTool(historianQueryWorkflow);
