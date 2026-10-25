@@ -9,7 +9,10 @@ import {
 } from "@earendil-works/pi-coding-agent";
 
 // Shared setup for the Unit 1 Pi exercise.
-export async function createWorkshopAgent(extensions: ExtensionFactory[] = []) {
+export async function createWorkshopAgent(
+  extensions: ExtensionFactory[] = [],
+  tools = ["read", "write", "mcp__explorer__search_documents"],
+) {
   const modelRuntime = await ModelRuntime.create({
     modelsPath: null,
     refreshOnCreate: false,
@@ -60,7 +63,7 @@ export async function createWorkshopAgent(extensions: ExtensionFactory[] = []) {
     resourceLoader,
     settingsManager,
     sessionManager: SessionManager.inMemory(),
-    tools: ["read", "write", "mcp__explorer__search_documents"],
+    tools,
   });
   session.subscribe((event) => {
     if (event.type === "tool_execution_start")
