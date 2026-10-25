@@ -19,21 +19,25 @@ import { JsonPipe } from '@angular/common';
         }
       </select>
       <label for="rag-chat-question">Your question</label>
-      <textarea id="rag-chat-question" #question rows="3">The cooling room is too warm. What should I do?</textarea>
+      <textarea id="rag-chat-question" #question rows="3">
+The cooling room is too warm. What should I do?</textarea>
       <button type="button" (click)="ask(metric.value, question.value)" [disabled]="busy()">
         {{ busy() ? 'Generating…' : 'Ask with documents' }}
       </button>
       <div class="local-answer" aria-live="polite" [attr.aria-busy]="busy()">
-        @if (error()) { <p role="alert">{{ error() }}</p> }
+        @if (error()) {
+          <p role="alert">{{ error() }}</p>
+        }
         @if (result(); as reply) {
           <p class="chat-boundary">
-            {{ reply.snapshot.room }} · {{ reply.snapshot.metric }}: {{ reply.snapshot.value }} {{ reply.snapshot.unit }}<br />
+            {{ reply.snapshot.room }} · {{ reply.snapshot.metric }}: {{ reply.snapshot.value }}
+            {{ reply.snapshot.unit }}<br />
             Observed: {{ reply.snapshot.observedAt }}
           </p>
           <p class="answer-text">{{ reply.answer }}</p>
           <details>
-            <summary>MCP Tool Call</summary>
-            <pre>{{ reply.toolCall | json }}</pre>
+            <summary>MCP Tool Calls</summary>
+            <pre>{{ reply.toolCalls | json }}</pre>
           </details>
           <details>
             <summary>Retrieved Passages ({{ reply.evidence.length }})</summary>
@@ -43,16 +47,18 @@ import { JsonPipe } from '@angular/common';
                 <p>Similarity: {{ passage.score.toFixed(4) }}</p>
                 <p>{{ passage.text }}</p>
               </article>
-            } @empty { <p>No supporting passages were found.</p> }
+            } @empty {
+              <p>No supporting passages were found.</p>
+            }
           </details>
           <details>
-            <summary>Messages Sent to Gemma</summary>
+            <summary>Agent Conversation</summary>
             <pre>{{ reply.messages | json }}</pre>
           </details>
         }
       </div>
     </aside>
-`,
+  `,
   styles: CHAT_STYLES,
 })
 export class RagChatComponent {
@@ -63,8 +69,8 @@ export class RagChatComponent {
   protected readonly result = signal<{
     answer: string;
     evidence: { id: string; source: string; title: string; text: string; score: number }[];
-    messages: { role: string; content: string }[];
-    toolCall: { name: string; arguments: { question: string } };
+    messages: unknown[];
+    toolCalls: { name: string; arguments: Record<string, unknown> }[];
     snapshot: {
       room: string;
       metric: string;
@@ -88,9 +94,11 @@ export class RagChatComponent {
         ),
       );
     } catch (error) {
-      this.error.set(error instanceof HttpErrorResponse && typeof error.error?.error === 'string'
-        ? error.error.error
-        : 'The assistant is unavailable. Check the backend and model connection.');
+      this.error.set(
+        error instanceof HttpErrorResponse && typeof error.error?.error === 'string'
+          ? error.error.error
+          : 'The assistant is unavailable. Check the backend and model connection.',
+      );
     } finally {
       this.busy.set(false);
     }
