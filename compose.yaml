@@ -38,12 +38,13 @@ services:
       PGDATABASE: raglab
       ADMIN_PASSWORD: local-workshop-admin
       WORKSHOP_PASSWORD: workshop
-      EMBED_BASE_URL: ${EMBED_DOCKER_BASE_URL:-http://llama:8080/v1}
-      EMBED_MODEL: ${EMBED_MODEL:-workshop-embed}
+      RAG_SERVICE_TOKEN: ${RAG_SERVICE_TOKEN:-local-workshop-rag}
+      EMBED_BASE_URL: ${EMBED_DOCKER_BASE_URL:-https://openrouter.ai/api/v1}
+      EMBED_MODEL: ${EMBED_MODEL:-baai/bge-m3}
       EMBED_API_KEY: ${EMBED_API_KEY:-}
-      EMBED_SPACE_ID: workshop-embed-v1
-      DOCUMENT_PREFIX: "title: none | text: "
-      QUERY_PREFIX: "task: search result | query: "
+      EMBED_SPACE_ID: ${EMBED_SPACE_ID:-baai-bge-m3-v1}
+      DOCUMENT_PREFIX: ""
+      QUERY_PREFIX: ""
       LLM_BASE_URL: ${LLM_DOCKER_BASE_URL:-http://llama:8080/v1}
       LLM_MODEL: ${LLM_MODEL:-Gemma}
       LLM_API_KEY: ${LLM_API_KEY:-}
@@ -64,12 +65,17 @@ services:
       COPILOTKIT_TELEMETRY_DISABLED: "true"
       FACILITY_CHAT_MODE: ${FACILITY_CHAT_MODE:-local}
       MASTRA_BASE_URL: http://mastra:4211
+      RAG_BASE_URL: http://explorer:4341
+      RAG_SERVICE_TOKEN: ${RAG_SERVICE_TOKEN:-local-workshop-rag}
       LLM_BASE_URL: ${LLM_DOCKER_BASE_URL:-http://llama:8080/v1}
       LLM_MODEL: ${LLM_MODEL:-Gemma}
       LLM_API_KEY: ${LLM_API_KEY:-}
       FACILITY_DB_PATH: /data/facility.sqlite
     ports: ["127.0.0.1:${FACILITY_PORT:-3101}:3101"]
-    volumes: ["incident-data:/data"]
+    volumes:
+      - incident-data:/data
+      - ./workshop/exercises:/app/workshop/exercises:ro
+      - exercise-deps:/app/workshop/exercises/node_modules
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3101/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 5s
@@ -92,6 +98,8 @@ services:
       MASTRA_TELEMETRY_DISABLED: "1"
       MASTRA_STORAGE_PATH: /data/mastra.sqlite
       FACILITY_BASE_URL: http://incident-backend:3101
+      RAG_BASE_URL: http://explorer:4341
+      RAG_SERVICE_TOKEN: ${RAG_SERVICE_TOKEN:-local-workshop-rag}
       LLM_BASE_URL: ${LLM_DOCKER_BASE_URL:-http://llama:8080/v1}
       LLM_MODEL: ${LLM_MODEL:-Gemma}
       LLM_API_KEY: ${LLM_API_KEY:-}
@@ -113,8 +121,8 @@ services:
       LLM_BASE_URL: ${LLM_DOCKER_BASE_URL:-http://llama:8080/v1}
       LLM_MODEL: ${LLM_MODEL:-Gemma}
       LLM_API_KEY: ${LLM_API_KEY:-}
-      EMBED_BASE_URL: ${EMBED_DOCKER_BASE_URL:-http://llama:8080/v1}
-      EMBED_MODEL: ${EMBED_MODEL:-workshop-embed}
+      EMBED_BASE_URL: ${EMBED_DOCKER_BASE_URL:-https://openrouter.ai/api/v1}
+      EMBED_MODEL: ${EMBED_MODEL:-baai/bge-m3}
       EMBED_API_KEY: ${EMBED_API_KEY:-}
     volumes:
       - .:/workspace

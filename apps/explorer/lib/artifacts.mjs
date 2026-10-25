@@ -48,7 +48,7 @@ export function cosine(a,b) {
   return dot/Math.sqrt(aa*bb);
 }
 export function embeddingConfig() {
-  return {model:process.env.EMBED_MODEL,spaceId:process.env.EMBED_SPACE_ID??'workshop-embed-v1',documentPrefix:process.env.DOCUMENT_PREFIX??'title: none | text: ',queryPrefix:process.env.QUERY_PREFIX??'task: search result | query: '};
+  return {model:process.env.EMBED_MODEL,spaceId:process.env.EMBED_SPACE_ID,documentPrefix:process.env.DOCUMENT_PREFIX??'',queryPrefix:process.env.QUERY_PREFIX??''};
 }
 export function resolveEmbeddingConfig(embedding,config=embeddingConfig()) {
   if(!embedding || embedding.model!==config.model || embedding.documentPrefix!==config.documentPrefix) throw Error('Imported vectors use a different model or document prefix. Re-embed with the current lab settings.');

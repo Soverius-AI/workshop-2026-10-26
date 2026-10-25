@@ -35,6 +35,16 @@ const server=createServer(async(req,res)=>{
  try{
  const path=new URL(req.url,'http://localhost').pathname;
  if(path==='/api/health'){await practice.query('SELECT 1');return reply(res,200,{status:'ok'});}
+ // Service-to-service retrieval is read-only and restricted to imported practice chunks.
+ if(path==='/api/retrieve'){
+  if(req.method!=='POST')return reply(res,405,{error:'Method not allowed'});
+  const token=process.env.RAG_SERVICE_TOKEN;
+  if(!token||req.headers.authorization!==`Bearer ${token}`)return reply(res,401,{error:'Invalid retrieval service token'});
+  if(!req.headers['content-type']?.startsWith('application/json'))return reply(res,415,{error:'Send JSON'});
+  const b=await body(req);
+  const result=await search({question:b.question,scope:'practice',mode:'vector'},{role:'operator'});
+  return reply(res,200,{question:result.question,hits:result.hits.slice(0,5),sql:result.sql});
+ }
  if(path.startsWith('/api/') && req.method!=='GET'){checkOrigin(req);if(req.method!=='POST')return reply(res,405,{error:'Method not allowed'});if(!req.headers['content-type']?.startsWith('application/json'))return reply(res,415,{error:'Send JSON'});}
  if(path==='/api/login'&&req.method==='POST'){
   const key=req.socket.remoteAddress;const f=failures.get(key);if(f?.until>Date.now()&&f.count>=10)return reply(res,429,{error:'Too many attempts. Try again in one minute.'});
