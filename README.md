@@ -93,13 +93,13 @@ Upload `embeddings.json` to the Explorer. Use its PostgreSQL console and retriev
 `workshop/exercises/pi-rag.mts` reuses the Unit 1 Pi helper and registers Explorer with Pi’s built-in MCP support. Pi discovers the search tool directly from the server:
 
 ```sh
-node workshop/exercises/pi-rag.mts "Use search_documents for: The cooling room is too warm. What should I do? Write a short answer with passage citations to rag-answer.txt. Do not invent live readings or contacts."
+node workshop/exercises/pi-rag.mts "Use search_documents and write the answer into rag-answer.txt for: The cooling room is too warm. What should I do?"
 ```
 
 Or via Docker:
 
 ```sh
-docker compose run exercises node workshop/exercises/pi-rag.mts "Use search_documents for: The cooling room is too warm. What should I do? Write a short answer with passage citations to rag-answer.txt. Do not invent live readings or contacts."
+docker compose run exercises node workshop/exercises/pi-rag.mts "Use search_documents and write the answer into rag-answer.txt for: The cooling room is too warm. What should I do?"
 ```
 
 Pi discovers mcp__explorer__search_documents from Explorer. The CLI retains the Unit 1 file tools and can write an answer file. The incident backend reuses the same agent with only document search enabled; `chat-rag.mts` passes the trusted measurement snapshot and returns the answer plus the recorded run to the UI.
