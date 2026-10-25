@@ -25,7 +25,13 @@ All branches include the same Docker services and dependencies. Preparation buil
 
 Before Unit 1, copy `.env.example` to `.env`. Set the `LLM_*` values there for local llama.cpp or OpenRouter. The same settings apply to the client, Pi, incident chat, Explorer grounding and Mastra. `EMBED_*` configures the separate embedding model. Compose reads `.env` automatically. The model scripts load `.env` themselves, so `node workshop/exercises/client.mts` works directly from the repository root. Use `http://localhost:8080/v1` for `LLM_BASE_URL`. Both embedding URLs use `https://openrouter.ai/api/v1`. Compose maps `LLM_DOCKER_BASE_URL` and `EMBED_DOCKER_BASE_URL` to the container settings; the local chat address is `http://llama:8080/v1`. For OpenRouter, set both LLM URLs to `https://openrouter.ai/api/v1`. The `/v1` suffix is required for the OpenAI-compatible llama.cpp endpoints.
 
-Run your TypeScript files with the prepared Node.js container:
+Run your TypeScript files from the repository root:
+
+```sh
+node workshop/exercises/YOUR_FILE.mts
+```
+
+Or via Docker:
 
 ```sh
 docker compose run exercises node workshop/exercises/YOUR_FILE.mts
