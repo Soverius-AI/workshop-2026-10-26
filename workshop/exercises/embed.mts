@@ -2,10 +2,12 @@
 import OpenAI from 'openai';
 import { readFile, writeFile } from 'node:fs/promises';
 
+process.loadEnvFile();
+
 const [inputPath, outputPath] = process.argv.slice(2);
 const data = JSON.parse(await readFile(inputPath, 'utf8'));
 const client = new OpenAI({
-  baseURL: process.env.EMBED_BASE_URL,
+  baseURL: process.env.EMBED_BASE_URL || 'http://localhost:8080/v1',
   apiKey: process.env.EMBED_API_KEY,
 });
 
