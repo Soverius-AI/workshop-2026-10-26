@@ -61,11 +61,20 @@ export const createFacilityServer = (
   historian?: HistorianQueryExecutor,
   copilotRuntime?: NodeCopilotListener,
   chat?: (snapshot: unknown, question: string) => Promise<string | null>,
-  ragChat?: (snapshot: unknown, question: string) => Promise<{
+  ragChat?: (
+    snapshot: unknown,
+    question: string,
+  ) => Promise<{
     answer: string | null;
-    evidence: { id: string; source: string; title: string; text: string; score: number }[];
-    messages: { role: string; content: string }[];
-    toolCall: { name: string; arguments: { question: string } };
+    evidence: {
+      id: string;
+      source: string;
+      title: string;
+      text: string;
+      score: number;
+    }[];
+    messages: unknown[];
+    toolCalls: { name: string; arguments: Record<string, unknown> }[];
   }>,
 ) =>
   createServer(async (request, response) => {
@@ -73,7 +82,10 @@ export const createFacilityServer = (
       const method = request.method ?? "GET";
       const url = new URL(request.url ?? "/", "http://localhost");
 
-      if (method === "POST" && ["/api/chat", "/api/rag-chat"].includes(url.pathname)) {
+      if (
+        method === "POST" &&
+        ["/api/chat", "/api/rag-chat"].includes(url.pathname)
+      ) {
         const isRag = url.pathname === "/api/rag-chat";
         const selectedChat = isRag ? ragChat : chat;
         const input = (await readBody(request)) as {
@@ -104,7 +116,11 @@ export const createFacilityServer = (
           return;
         }
         if (!selectedChat) {
-          sendJson(response, 503, { error: isRag ? "RAG chat is unavailable." : "Local chat is unavailable." });
+          sendJson(response, 503, {
+            error: isRag
+              ? "RAG chat is unavailable."
+              : "Local chat is unavailable.",
+          });
           return;
         }
         const snapshot = {
@@ -120,11 +136,16 @@ export const createFacilityServer = (
         try {
           const reply = await selectedChat(snapshot, input.question);
           sendJson(response, 200, {
-            ...(typeof reply === "object" && reply !== null ? reply : { answer: reply }),
+            ...(typeof reply === "object" && reply !== null
+              ? reply
+              : { answer: reply }),
             snapshot,
           });
         } catch (error) {
-          console.error("Incident chat failed:", error instanceof Error ? error.message : "Unknown error");
+          console.error(
+            "Incident chat failed:",
+            error instanceof Error ? error.message : "Unknown error",
+          );
           sendJson(response, 503, {
             error: isRag
               ? "RAG chat could not complete the request. Check chat-rag.mts, the MCP connection, OpenRouter embeddings and the imported corpus."
