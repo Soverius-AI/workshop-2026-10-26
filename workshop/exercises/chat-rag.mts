@@ -16,16 +16,10 @@ export async function chat(snapshot: unknown, question: string) {
     ["mcp__explorer__search_documents"],
   );
 
-  try {
-    await session.prompt(
-      `Use search_documents to answer briefly: ${question}\nMeasurement: ${JSON.stringify(snapshot)}`,
-    );
-    return session.getLastAssistantText() ?? null;
-  } finally {
-    await session.extensionRunner.emit({
-      type: "session_shutdown",
-      reason: "quit",
-    });
-    session.dispose();
-  }
+  await session.prompt(
+    `Use search_documents to answer briefly: ${question}\nMeasurement: ${JSON.stringify(snapshot)}`,
+  );
+  const answer = session.getLastAssistantText() ?? null;
+  session.dispose();
+  return answer;
 }

@@ -14,13 +14,6 @@ const session = await createWorkshopAgent([
   },
 ]);
 
-try {
-  await session.prompt(process.argv[2]);
-  console.log(session.getLastAssistantText());
-} finally {
-  await session.extensionRunner.emit({
-    type: "session_shutdown",
-    reason: "quit",
-  });
-  session.dispose();
-}
+await session.prompt(process.argv[2]);
+console.log(session.getLastAssistantText());
+session.dispose();
