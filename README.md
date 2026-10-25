@@ -102,4 +102,4 @@ The MCP transport is supplied. In Unit 2, complete `apps/explorer/lib/search-doc
 docker compose run exercises node workshop/exercises/pi-rag.mts "Use search_documents for: The cooling room is too warm. What should I do? Write a short answer with passage citations to rag-answer.txt. Do not invent live readings or contacts."
 ```
 
-The incident backend calls retrieval explicitly. Pi lets Gemma select the tool, then uses its result to write the answer file.
+The incident backend calls retrieval explicitly. Pi exposes only search_documents and write for this exercise. Gemma selects the tool, then uses its result to write the answer file.

@@ -21,6 +21,7 @@ const searchDocuments = defineTool({
   },
 });
 const session = await createWorkshopAgent([searchDocuments]);
+session.setActiveToolsByName(['search_documents', 'write']);
 try {
   await session.prompt(process.argv[2]);
   console.log(session.getLastAssistantText());
