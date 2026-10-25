@@ -34,12 +34,6 @@ The cooling room is too warm. What should I do?</textarea>
           </p>
           <p class="answer-text">{{ reply.answer }}</p>
         }
-          </details>
-          <details>
-            <summary>Agent Conversation</summary>
-            <pre>{{ reply.messages | json }}</pre>
-          </details>
-        }
       </div>
     </aside>
   `,
