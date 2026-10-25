@@ -50,7 +50,14 @@ Slides and exercise instructions are provided on the participant website. The pr
 
 ## Run the Unit 1 code
 
-From the repository root, run your files with the prepared Node container:
+From the repository root, run your files:
+
+```sh
+node workshop/exercises/client.mts
+node workshop/exercises/pi.mts "Read workshop/corpus/company-documents/cooling-room-incident.md and write a short factual summary to factory-summary.txt."
+```
+
+Or via Docker:
 
 ```sh
 docker compose run exercises node workshop/exercises/client.mts
