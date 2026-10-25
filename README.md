@@ -54,3 +54,5 @@ docker compose run exercises node workshop/exercises/pi.mts "Read workshop/corpu
 For local inference, load Gemma manually in http://localhost:8080 first. The provided `pdf-to-text.mts`, `chunk-fixed.mts` and `chunk-paragraph.mts` utilities are used during Unit 2. The completed embedding script is on `solution-unit-2`.
 
 Unit 1 uses `/api/chat` with the measurement snapshot. Unit 2 uses `/api/rag-chat`; its separate RAG view calls the Explorer MCP tool `search_documents` before sending the retrieved text to Gemma. The MCP client setup and dependencies are supplied in preparation.
+
+The MCP transport is supplied. In Unit 2, complete `apps/explorer/lib/search-documents.mts`, then use the tool from the incident backend and Pi. Explorer mounts its `lib` folder so code edits require a restart, not an image rebuild. The completed retrieval, incident chat and Pi scripts belong to `solution-unit-2`.
