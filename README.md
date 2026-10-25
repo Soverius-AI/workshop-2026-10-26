@@ -117,7 +117,7 @@ The MCP transport is supplied. In Unit 2, complete `apps/explorer/lib/search-doc
 
 `apps/explorer/lib/search-documents.mts` contains the completed question-embedding and pgvector query. The supplied server calls it for `search_documents`. Restart Explorer after edits; the source folder is mounted.
 
-`workshop/exercises/pi-rag.mts` reuses the Unit 1 Pi helper and forwards its document-search tool to that MCP server:
+`workshop/exercises/pi-rag.mts` reuses the Unit 1 Pi helper and registers Explorer with Pi’s built-in MCP support. Pi discovers the search tool directly from the server:
 
 ```sh
 node workshop/exercises/pi-rag.mts "Use search_documents for: The cooling room is too warm. What should I do? Write a short answer with passage citations to rag-answer.txt. Do not invent live readings or contacts."
@@ -129,4 +129,4 @@ Or via Docker:
 docker compose run exercises node workshop/exercises/pi-rag.mts "Use search_documents for: The cooling room is too warm. What should I do? Write a short answer with passage citations to rag-answer.txt. Do not invent live readings or contacts."
 ```
 
-The incident backend calls retrieval explicitly. Pi exposes only search_documents and write for this exercise. Gemma selects the tool, then uses its result to write the answer file.
+The incident backend calls retrieval explicitly. Pi discovers mcp__explorer__search_documents from Explorer and retains the Unit 1 file tools. Gemma selects the tool, then uses its result to write the answer file.
