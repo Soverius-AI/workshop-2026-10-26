@@ -6,7 +6,7 @@ import {
 export async function createWorkshopAgent(customTools: ToolDefinition[] = []) {
   const modelRuntime = await ModelRuntime.create({modelsPath: null, refreshOnCreate: false});
   modelRuntime.registerProvider('workshop', {
-    baseUrl: process.env.LLM_BASE_URL,
+    baseUrl: process.env.LLM_BASE_URL || 'http://localhost:8080/v1',
     api: 'openai-completions',
     apiKey: process.env.LLM_API_KEY || 'local', // Pi requires a placeholder; llama-server has no authentication.
     authHeader: Boolean(process.env.LLM_API_KEY),
