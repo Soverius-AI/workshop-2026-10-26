@@ -7,10 +7,12 @@
     "start": "node server.mjs"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "1.30.0",
     "pdf-parse": "2.4.5",
     "pdfjs-dist": "5.4.296",
     "pg": "8.16.3",
-    "umap-js": "1.4.0"
+    "umap-js": "1.4.0",
+    "zod": "4.6.5"
   },
   "devDependencies": {
     "esbuild": "0.25.10"
