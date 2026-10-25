@@ -25,7 +25,13 @@ All branches include the same Docker services and dependencies. Preparation buil
 
 Before Unit 1, copy `.env.example` to `.env`. Set the `LLM_*` values there for local llama.cpp or OpenRouter. The same settings apply to the client, Pi, incident chat, Explorer grounding and Mastra. `EMBED_*` configures the separate embedding model. Compose reads `.env` automatically. The model scripts load `.env` themselves, so `node workshop/exercises/client.mts` works directly from the repository root. Use `http://localhost:8080/v1` for `LLM_BASE_URL`. Both embedding URLs use `https://openrouter.ai/api/v1`. Compose maps `LLM_DOCKER_BASE_URL` and `EMBED_DOCKER_BASE_URL` to the container settings; the local chat address is `http://llama:8080/v1`. For OpenRouter, set both LLM URLs to `https://openrouter.ai/api/v1`. The `/v1` suffix is required for the OpenAI-compatible llama.cpp endpoints.
 
-Run your TypeScript files with the prepared Node.js container:
+Run your TypeScript files from the repository root:
+
+```sh
+node workshop/exercises/YOUR_FILE.mts
+```
+
+Or via Docker:
 
 ```sh
 docker compose run exercises node workshop/exercises/YOUR_FILE.mts
@@ -44,7 +50,14 @@ Slides and exercise instructions are provided on the participant website. The pr
 
 ## Run the Unit 1 code
 
-From the repository root, run your files with the prepared Node container:
+From the repository root, run your files:
+
+```sh
+node workshop/exercises/client.mts
+node workshop/exercises/pi.mts "Read workshop/corpus/company-documents/cooling-room-incident.md and write a short factual summary to factory-summary.txt."
+```
+
+Or via Docker:
 
 ```sh
 docker compose run exercises node workshop/exercises/client.mts
@@ -56,6 +69,14 @@ For local inference, load Gemma manually in http://localhost:8080 first. The pro
 ## Run the Unit 2 code
 
 Extract and chunk a PDF, then embed it with the OpenRouter settings in `.env`:
+
+```sh
+node workshop/exercises/pdf-to-text.mts workshop/corpus/reference-documents/optyma-cooler.pdf optyma.txt
+node workshop/exercises/chunk-paragraph.mts optyma.txt optyma-paragraph.json
+node workshop/exercises/embed.mts optyma-paragraph.json embeddings.json
+```
+
+Or via Docker:
 
 ```sh
 docker compose run exercises node workshop/exercises/pdf-to-text.mts workshop/corpus/reference-documents/optyma-cooler.pdf optyma.txt
@@ -97,6 +118,12 @@ The MCP transport is supplied. In Unit 2, complete `apps/explorer/lib/search-doc
 `apps/explorer/lib/search-documents.mts` contains the completed question-embedding and pgvector query. The supplied server calls it for `search_documents`. Restart Explorer after edits; the source folder is mounted.
 
 `workshop/exercises/pi-rag.mts` reuses the Unit 1 Pi helper and forwards its document-search tool to that MCP server:
+
+```sh
+node workshop/exercises/pi-rag.mts "Use search_documents for: The cooling room is too warm. What should I do? Write a short answer with passage citations to rag-answer.txt. Do not invent live readings or contacts."
+```
+
+Or via Docker:
 
 ```sh
 docker compose run exercises node workshop/exercises/pi-rag.mts "Use search_documents for: The cooling room is too warm. What should I do? Write a short answer with passage citations to rag-answer.txt. Do not invent live readings or contacts."
