@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { JsonPipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { FacilityStore } from '../../data/facility-store';
 import { CopilotChat } from '@copilotkit/angular';
@@ -7,11 +8,11 @@ import { StreamingAutoScrollDirective } from './streaming-auto-scroll.directive'
 
 @Component({
   selector: 'app-chat',
-  imports: [CopilotChat, StreamingAutoScrollDirective],
+  imports: [CopilotChat, StreamingAutoScrollDirective, JsonPipe],
   template: `
     <aside aria-labelledby="chat-title">
       @if (localMode) {
-        <p class="eyebrow">Local model · Unit 1 / 2</p>
+        <p class="eyebrow">Gemma · Incident Management</p>
         <h2 id="chat-title">Factory assistant</h2>
         <label for="chat-metric">Reading</label>
         <select id="chat-metric" #metric>
@@ -23,7 +24,7 @@ import { StreamingAutoScrollDirective } from './streaming-auto-scroll.directive'
         <textarea id="chat-question" #question rows="3">
 The cooling room is too warm. What should I do?</textarea>
         <button type="button" (click)="ask(metric.value, question.value)" [disabled]="busy()">
-          {{ busy() ? 'Generating…' : 'Ask local model' }}
+          {{ busy() ? 'Generating…' : 'Ask assistant' }}
         </button>
         <div class="local-answer" aria-live="polite" [attr.aria-busy]="busy()">
           @if (error()) {
@@ -35,6 +36,26 @@ The cooling room is too warm. What should I do?</textarea>
               {{ reply.snapshot.unit }}<br />Observed: {{ reply.snapshot.observedAt }}
             </p>
             <p class="answer-text">{{ reply.answer }}</p>
+            @if (reply.evidence; as evidence) {
+              <details>
+                <summary>Retrieved Passages ({{ evidence.length }})</summary>
+                @for (passage of evidence; track passage.id) {
+                  <article class="evidence">
+                    <h3>[{{ passage.id }}] · {{ passage.title }}</h3>
+                    <p>Similarity: {{ passage.score.toFixed(4) }}</p>
+                    <p>{{ passage.text }}</p>
+                  </article>
+                } @empty {
+                  <p>No supporting passages were found.</p>
+                }
+              </details>
+            }
+            @if (reply.messages) {
+              <details>
+                <summary>Messages Sent to Gemma</summary>
+                <pre>{{ reply.messages | json }}</pre>
+              </details>
+            }
           }
         </div>
       } @else {
@@ -174,6 +195,14 @@ The cooling room is too warm. What should I do?</textarea>
       line-height: 1.6;
     }
 
+    details { margin: 14px 0; }
+    summary { cursor: pointer; font-weight: 600; }
+    summary:focus-visible { outline: 3px solid var(--so-brand); outline-offset: 3px; }
+    .evidence { border-top: 1px solid var(--so-border); margin-top: 12px; }
+    .evidence h3 { font-size: 0.82rem; overflow-wrap: anywhere; }
+    .evidence p, pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.78rem; line-height: 1.5; }
+    pre { padding: 12px; background: var(--so-surface-soft); border: 1px solid var(--so-border); border-radius: 8px; }
+
     copilot-chat {
       display: block;
       height: 100%;
@@ -202,6 +231,8 @@ export class ChatComponent {
   protected readonly error = signal('');
   protected readonly result = signal<{
     answer: string;
+    evidence?: { id: string; source: string; title: string; text: string; score: number }[];
+    messages?: { role: string; content: string }[];
     snapshot: {
       room: string;
       metric: string;
@@ -224,8 +255,10 @@ export class ChatComponent {
           }),
         ),
       );
-    } catch {
-      this.error.set('Load Gemma in llama-server, wait until it is ready, then try again.');
+    } catch (error) {
+      this.error.set(error instanceof HttpErrorResponse && typeof error.error?.error === 'string'
+        ? error.error.error
+        : 'The assistant is unavailable. Check the backend and model connection.');
     } finally {
       this.busy.set(false);
     }

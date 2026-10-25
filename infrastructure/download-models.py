@@ -4,7 +4,6 @@ import subprocess
 
 models = [
     ("ggml-org/gemma-4-12B-it-GGUF", "gemma-4-12B-it-Q4_0.gguf"),
-    ("ggml-org/embeddinggemma-300M-GGUF", "embeddinggemma-300M-Q8_0.gguf"),
 ]
 
 for repo, filename in models:

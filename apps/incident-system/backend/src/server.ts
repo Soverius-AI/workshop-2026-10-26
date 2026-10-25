@@ -60,7 +60,11 @@ export const createFacilityServer = (
   investigate: InvestigateHistorian,
   historian?: HistorianQueryExecutor,
   copilotRuntime?: NodeCopilotListener,
-  chat?: (snapshot: unknown, question: string) => Promise<string | null>,
+  chat?: (snapshot: unknown, question: string) => Promise<string | null | {
+    answer: string | null;
+    evidence: { id: string; source: string; title: string; text: string; score: number }[];
+    messages: { role: string; content: string }[];
+  }>,
 ) =>
   createServer(async (request, response) => {
     try {
@@ -110,14 +114,15 @@ export const createFacilityServer = (
           source: "Fictional workshop telemetry from SQLite",
         };
         try {
+          const reply = await chat(snapshot, input.question);
           sendJson(response, 200, {
-            answer: await chat(snapshot, input.question),
+            ...(typeof reply === "object" && reply !== null ? reply : { answer: reply }),
             snapshot,
           });
-        } catch {
+        } catch (error) {
+          console.error("Incident chat failed:", error instanceof Error ? error.message : "Unknown error");
           sendJson(response, 503, {
-            error:
-              "Load Gemma in llama-server at http://127.0.0.1:8080, wait until it is ready, then try again.",
+            error: "The assistant could not complete the request. Check Gemma, the OpenRouter embedding key and the imported PostgreSQL embeddings.",
           });
         }
         return;
