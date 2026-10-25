@@ -120,7 +120,7 @@ This checkpoint adapts AI DevCraft commit `021033c11b5549d95fd35f698a3049e74332a
 
 The four-stage workflow is SQL generation → deterministic preflight → model review → facility-owned validation and execution. Jev and its hosted decisions endpoint are removed. Reviewer errors stop the query; there is no automatic approval or cloud fallback.
 
-Load Gemma manually in llama-server. Set `FACILITY_CHAT_MODE=mastra` in the root `.env`, then run:
+Start llama-server with `docker compose up llama`; Gemma loads automatically on the first request. Set `FACILITY_CHAT_MODE=mastra` in the root `.env`, then run:
 
 ```sh
 docker compose up mastra incident-backend incident
