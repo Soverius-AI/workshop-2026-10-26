@@ -3,11 +3,9 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { FacilityStore } from '../../data/facility-store';
 import { CHAT_STYLES } from './chat.styles';
-import { JsonPipe } from '@angular/common';
 
 @Component({
   selector: 'app-rag-chat',
-  imports: [JsonPipe],
   template: `
     <aside aria-labelledby="rag-chat-title">
       <p class="eyebrow">MCP · RAG · Unit 2</p>
@@ -35,21 +33,7 @@ The cooling room is too warm. What should I do?</textarea>
             Observed: {{ reply.snapshot.observedAt }}
           </p>
           <p class="answer-text">{{ reply.answer }}</p>
-          <details>
-            <summary>MCP Tool Calls</summary>
-            <pre>{{ reply.toolCalls | json }}</pre>
-          </details>
-          <details>
-            <summary>Retrieved Passages ({{ reply.evidence.length }})</summary>
-            @for (passage of reply.evidence; track passage.id) {
-              <article class="evidence">
-                <h3>[{{ passage.id }}] · {{ passage.title }}</h3>
-                <p>Similarity: {{ passage.score.toFixed(4) }}</p>
-                <p>{{ passage.text }}</p>
-              </article>
-            } @empty {
-              <p>No supporting passages were found.</p>
-            }
+        }
           </details>
           <details>
             <summary>Agent Conversation</summary>
@@ -67,10 +51,7 @@ export class RagChatComponent {
   protected readonly busy = signal(false);
   protected readonly error = signal('');
   protected readonly result = signal<{
-    answer: string;
-    evidence: { id: string; source: string; title: string; text: string; score: number }[];
-    messages: unknown[];
-    toolCalls: { name: string; arguments: Record<string, unknown> }[];
+    answer: string | null;
     snapshot: {
       room: string;
       metric: string;

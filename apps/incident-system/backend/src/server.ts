@@ -61,21 +61,7 @@ export const createFacilityServer = (
   historian?: HistorianQueryExecutor,
   copilotRuntime?: NodeCopilotListener,
   chat?: (snapshot: unknown, question: string) => Promise<string | null>,
-  ragChat?: (
-    snapshot: unknown,
-    question: string,
-  ) => Promise<{
-    answer: string | null;
-    evidence: {
-      id: string;
-      source: string;
-      title: string;
-      text: string;
-      score: number;
-    }[];
-    messages: unknown[];
-    toolCalls: { name: string; arguments: Record<string, unknown> }[];
-  }>,
+  ragChat?: (snapshot: unknown, question: string) => Promise<string | null>,
 ) =>
   createServer(async (request, response) => {
     try {
