@@ -8,7 +8,7 @@ From this checkout’s root, run:
 docker compose up
 ```
 
-This prepares the applications and downloads **Gemma 12B** and **EmbeddingGemma**.
+This prepares the applications and downloads **Gemma 12B**.
 
 Wait for `download-models` to exit with **code 0**, then check that these pages open:
 
@@ -19,9 +19,11 @@ Wait for `download-models` to exit with **code 0**, then check that these pages 
 
 The other services keep running. Press **Ctrl+C** to stop; the downloaded models remain available for the workshop.
 
+Embeddings use **BAAI BGE-M3 through OpenRouter** for both documents and questions. Set `EMBED_API_KEY` in your ignored `.env`; internet access is required for embeddings and live retrieval. Gemma remains local.
+
 All branches include the same Docker services and dependencies. Preparation builds them once; switching to a solution branch does not require another package download. Cached models are reused without contacting Hugging Face. Local llama-server is the default; `.env.example` documents the optional OpenRouter settings.
 
-Before Unit 1, copy `.env.example` to `.env`. Set the `LLM_*` values there for local llama.cpp or OpenRouter. The same settings apply to the client, Pi, incident chat, Explorer grounding and Mastra. `EMBED_*` configures the separate embedding model. Compose reads `.env` automatically. The model scripts load `.env` themselves, so `node workshop/exercises/client.mts` works directly from the repository root. Use `http://localhost:8080/v1` for `LLM_BASE_URL` and `EMBED_BASE_URL`. Compose maps `LLM_DOCKER_BASE_URL` and `EMBED_DOCKER_BASE_URL` to the container settings; their local address is `http://llama:8080/v1`. For OpenRouter, set both LLM URLs to `https://openrouter.ai/api/v1`. The `/v1` suffix is required for the OpenAI-compatible llama.cpp endpoints.
+Before Unit 1, copy `.env.example` to `.env`. Set the `LLM_*` values there for local llama.cpp or OpenRouter. The same settings apply to the client, Pi, incident chat, Explorer grounding and Mastra. `EMBED_*` configures the separate embedding model. Compose reads `.env` automatically. The model scripts load `.env` themselves, so `node workshop/exercises/client.mts` works directly from the repository root. Use `http://localhost:8080/v1` for `LLM_BASE_URL`. Both embedding URLs use `https://openrouter.ai/api/v1`. Compose maps `LLM_DOCKER_BASE_URL` and `EMBED_DOCKER_BASE_URL` to the container settings; the local chat address is `http://llama:8080/v1`. For OpenRouter, set both LLM URLs to `https://openrouter.ai/api/v1`. The `/v1` suffix is required for the OpenAI-compatible llama.cpp endpoints.
 
 Run your TypeScript files with the prepared Node.js container:
 
@@ -29,7 +31,7 @@ Run your TypeScript files with the prepared Node.js container:
 docker compose run exercises node workshop/exercises/YOUR_FILE.mts
 ```
 
-Edit files in your checkout; generated files appear there too. Keep the Docker images, volumes and `models/` directory. Clone this repository (rather than downloading a ZIP) while online so all solution branches are available offline.
+Edit files in your checkout; generated files appear there too. Keep the Docker images, volumes and `models/` directory. Clone this repository (rather than downloading a ZIP) while online so all solution branches are available during the workshop.
 
 ## Code checkpoints
 
@@ -72,7 +74,7 @@ The four-stage workflow is SQL generation → deterministic preflight → model 
 Load Gemma manually in llama-server. Set `FACILITY_CHAT_MODE=mastra` in the root `.env`, then run:
 
 ```sh
-docker compose up -d mastra incident-backend incident
+docker compose up mastra incident-backend incident
 ```
 
 The prepared Mastra container watches this branch's agent source. No package install or image rebuild is needed. The Studio listens on 4211 and the incident application on 4300. Set `FACILITY_CHAT_MODE=local` to return to the Unit 1 client.
@@ -82,3 +84,6 @@ OpenRouter is optional. Create an ignored `.env` with `LLM_BASE_URL=https://open
 Progress events, frontend tools and the `review_alarm` approval interaction retain the webcast structure. Historian rows go directly to the UI; the conversational agent receives a completion message.
 
 Local model quality, tool calling and performance still require a live rehearsal. A second review call to the same model is not an independent model or a security guarantee; deterministic execution policy remains the final gate.
+## Connect the incident chat to RAG
+
+After importing the new OpenRouter embeddings in Explorer, set `FACILITY_CHAT_MODE=rag` in `.env`. Start `docker compose up llama postgres explorer incident-backend incident` and load Gemma manually. The incident chat retrieves imported passages before asking Gemma to answer. Expand Retrieved Passages and Messages Sent to Gemma to inspect the complete flow.
