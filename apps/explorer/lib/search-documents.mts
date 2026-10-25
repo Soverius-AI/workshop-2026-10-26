@@ -1,7 +1,8 @@
 import { practice } from './database.mjs';
 import { embedTexts } from './artifacts.mjs';
+import type { Passage } from '../../../workshop/exercises/rag-mcp-client.mts';
 
-export async function searchDocuments(question: string) {
+export async function searchDocuments(question: string): Promise<{ hits: Passage[] }> {
   const [vector] = await embedTexts([question], 'query');
   const { rows } = await practice.query(`
     SELECT id, source, title, section, page, content AS text,
