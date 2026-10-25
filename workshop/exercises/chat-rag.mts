@@ -33,6 +33,8 @@ export async function chat(snapshot: unknown, question: string) {
     messages,
     max_tokens: 350,
     temperature: 0,
+    // llama.cpp: return the answer without a separate thinking pass.
+    ...{ chat_template_kwargs: { enable_thinking: false } },
   });
   return { answer: result.choices[0].message.content, evidence, messages };
 }
